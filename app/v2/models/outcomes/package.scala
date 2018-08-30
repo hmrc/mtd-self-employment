@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import sbt.{ForkOptions, TestDefinition}
-import sbt.Tests.{Group, SubProcess}
+package v2.models
 
-object TestPhases {
-  def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] =
-    tests map {
-      test => Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions = Seq("-Dtest.name=" + test.name, "-Dlogger.resource=logback-test.xml"))))
-    }
+import v2.models.errors.MtdError
+
+package object outcomes {
+
+  type AuthOutcome = Either[MtdError, Boolean]
+  type MtdIdLookupOutcome = Either[MtdError, String]
+
 }

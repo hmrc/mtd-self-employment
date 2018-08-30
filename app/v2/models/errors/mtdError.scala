@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import sbt.{ForkOptions, TestDefinition}
-import sbt.Tests.{Group, SubProcess}
+package v2.models.errors
 
-object TestPhases {
-  def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] =
-    tests map {
-      test => Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions = Seq("-Dtest.name=" + test.name, "-Dlogger.resource=logback-test.xml"))))
-    }
+import play.api.libs.json.{Json, OFormat}
+
+trait MtdError
+
+case class Error(code: String, message: String) extends MtdError
+
+object Error {
+  implicit val format: OFormat[Error] = Json.format[Error]
 }
