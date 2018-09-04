@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
-package v2.models.errors
+package v2.connectors.httpparsers
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.http.Status.NO_CONTENT
+import uk.gov.hmrc.http.{HttpReads, HttpResponse}
+import v2.models.errors._
 
-trait MtdError
+object SubmitEOPSDeclarationHttpParser extends HttpParser {
 
-case class Error(code: String, reason: String) extends MtdError
-
-object Error {
-  implicit val format: OFormat[Error] = Json.format[Error]
+  implicit val submitEOPSDeclarationHttpReads: HttpReads[Option[DesError]] =
+    new HttpReads[Option[DesError]] {
+      override def read(method: String, url: String, response: HttpResponse): Option[DesError] = {
+        response.status match {
+          case NO_CONTENT => None
+          case _ => Some(parseErrors(response))
+        }
+      }
+    }
 }

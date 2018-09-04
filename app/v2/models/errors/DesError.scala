@@ -16,12 +16,8 @@
 
 package v2.models.errors
 
-import play.api.libs.json.{Json, OFormat}
+sealed trait DesError
 
-trait MtdError
-
-case class Error(code: String, reason: String) extends MtdError
-
-object Error {
-  implicit val format: OFormat[Error] = Json.format[Error]
-}
+case class SingleError(error: Error) extends DesError
+case class MultipleErrors(errors: Seq[Error]) extends DesError
+case class MultipleBVRErrors(errors: Seq[Error]) extends DesError
