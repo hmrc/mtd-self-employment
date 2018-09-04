@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-package v2.models.errors
+package v2.connectors.httpparsers
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.http.{HttpVerbs, Status}
+import support.UnitSpec
 
-trait MtdError
-
-case class Error(code: String, reason: String) extends MtdError
-
-object Error {
-  implicit val format: OFormat[Error] = Json.format[Error]
-}
+trait HttpParserSpec extends UnitSpec with Status with HttpVerbs
