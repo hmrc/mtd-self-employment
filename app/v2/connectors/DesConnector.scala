@@ -39,7 +39,7 @@ class DesConnector @Inject()(http: HttpClient,
                            (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[DesError]] = {
     import v2.connectors.httpparsers.SubmitEOPSDeclarationHttpParser.submitEOPSDeclarationHttpReads
 
-    val url = s"${appConfig.desBaseUrl}/income-tax/income-sources/nino/$nino/self-employments/$to/$from/declaration?incomeSourceId=$selfEmploymentId"
+    val url = s"${appConfig.desBaseUrl}/income-tax/income-sources/nino/$nino/self-employments/$from/$to/declaration?incomeSourceId=$selfEmploymentId"
 
     http.POSTEmpty[Option[DesError]](url)(submitEOPSDeclarationHttpReads, desHeaderCarrier, implicitly)
   }
