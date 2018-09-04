@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package v2.models
+package v2.models.errors
 
-import v2.models.errors.Error
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
 
-package object outcomes {
+case class Error(code: String, message: String)
 
-  type AuthOutcome = Either[Error, Boolean]
-  type MtdIdLookupOutcome = Either[Error, String]
-
+object Error {
+  implicit val writes: Writes[Error] = Json.writes[Error]
+  implicit val reads: Reads[Error] = (
+    (__ \ "code").read[String] and
+      (__ \ "reason").read[String]
+    ) (Error.apply _)
 }
