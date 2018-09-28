@@ -17,4 +17,10 @@
 package v2.models.errors
 
 object InvalidNinoError extends Error("NINO_INVALID", "The provided NINO is invalid")
+object InvalidNinoFormatError extends Error("FORMAT_NINO", "Invalid NINO")
 object DownstreamError extends Error("INTERNAL_SERVER_ERROR", "An internal server error occurred")
+object BusinessError extends Error("BUSINESS_ERROR", "Business validation error")
+object InvalidRequestError extends Error("INVALID_REQUEST", "Invalid request")
+object InternalError extends Error("INTERNAL_SERVER_ERROR", "Internal server error")
+object ServiceUnavailableError extends Error("SERVICE_UNAVAILABLE", "Internal server error")
+object NotFoundError extends Error("MATCHING_RESOURCE_NOT_FOUND", "Matching resource not found")

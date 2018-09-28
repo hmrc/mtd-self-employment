@@ -16,12 +16,24 @@
 
 package v2.models.errors
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json._
 
-trait MtdError
+case class ErrorResponse(error: Error, errors: Option[Seq[Error]])
 
-case class Error(code: String, reason: String) extends MtdError
+object ErrorResponse {
+  implicit val writes: Writes[ErrorResponse] = new Writes[ErrorResponse] {
+    override def writes(errorResponse: ErrorResponse): JsValue = {
 
-object Error {
-  implicit val format: OFormat[Error] = Json.format[Error]
+      val json = Json.obj(
+        "code" -> errorResponse.error.code,
+        "message" -> errorResponse.error.message
+      )
+
+      errorResponse.errors match {
+        case Some(errors) if errors.nonEmpty => json + ("errors" -> Json.toJson(errors))
+        case _ => json
+      }
+
+    }
+  }
 }

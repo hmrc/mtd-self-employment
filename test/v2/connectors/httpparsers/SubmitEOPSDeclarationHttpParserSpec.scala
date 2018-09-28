@@ -95,11 +95,28 @@ class SubmitEOPSDeclarationHttpParserSpec extends HttpParserSpec {
             |  }
             |}
           """.stripMargin)
+
         val expected = MultipleBVRErrors(Seq(Error("TEST_ID_1", ""), Error("TEST_ID_2", "")))
 
         val httpResponse = HttpResponse(BAD_REQUEST, Some(errorResponseJson))
         val result = submitEOPSDeclarationHttpReads.read(POST, "/test", httpResponse)
         result shouldBe Some(expected)
+      }
+    }
+
+    "return a downstream error" when {
+      "the parser is unable to parse the response json into a DesError model" in {
+        val errorResponseJson = Json.parse(
+          """
+            |{
+            |  "incorrect": "structure"
+            |}
+          """.stripMargin)
+
+        val httpResponse = HttpResponse(BAD_REQUEST, Some(errorResponseJson))
+        val result = submitEOPSDeclarationHttpReads.read(POST, "/test", httpResponse)
+
+        result shouldBe Some(SingleError(DownstreamError))
       }
     }
   }
