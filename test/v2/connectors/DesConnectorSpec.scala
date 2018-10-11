@@ -57,7 +57,7 @@ class DesConnectorSpec extends ConnectorSpec {
     val to = LocalDate.parse("2018-01-01")
     val selfEmploymentId = "test-se-id"
 
-    val url = s"$baseUrl/income-tax/income-sources/nino/$nino/self-employments/$from/$to/declaration?incomeSourceId=$selfEmploymentId"
+    val url = s"$baseUrl/income-tax/income-sources/nino/$nino/self-employment/$from/$to/declaration?incomeSourceId=$selfEmploymentId"
 
     "return a None" when {
       "the http client returns None" in new Test {
