@@ -47,6 +47,86 @@ class SubmitEOPSDeclarationHttpParserSpec extends HttpParserSpec {
         val result = submitEOPSDeclarationHttpReads.read(POST, "/test", httpResponse)
         result shouldBe Some(expected)
       }
+
+      "the http response contains a 403 with an error response body" in {
+        val errorResponseJson = Json.parse(
+          """
+            |{
+            |  "code": "TEST_CODE",
+            |  "reason": "some reason"
+            |}
+          """.stripMargin)
+        val expected = SingleError(Error("TEST_CODE", "some reason"))
+
+        val httpResponse = HttpResponse(FORBIDDEN, Some(errorResponseJson))
+        val result = submitEOPSDeclarationHttpReads.read(POST, "/test", httpResponse)
+        result shouldBe Some(expected)
+      }
+
+      "the http response contains a 409 with an error response body" in {
+        val errorResponseJson = Json.parse(
+          """
+            |{
+            |  "code": "TEST_CODE",
+            |  "reason": "some reason"
+            |}
+          """.stripMargin)
+        val expected = SingleError(Error("TEST_CODE", "some reason"))
+
+        val httpResponse = HttpResponse(CONFLICT, Some(errorResponseJson))
+        val result = submitEOPSDeclarationHttpReads.read(POST, "/test", httpResponse)
+        result shouldBe Some(expected)
+      }
+    }
+
+    "return a generic error" when {
+      "the http response contains a 404 with an error response body" in {
+        val errorResponseJson = Json.parse(
+          """
+            |{
+            |  "code": "TEST_CODE",
+            |  "reason": "some reason"
+            |}
+          """.
+            stripMargin)
+        val expected = GenericError(NotFoundError)
+
+        val httpResponse = HttpResponse(NOT_FOUND, Some(errorResponseJson))
+        val result = submitEOPSDeclarationHttpReads.read(POST, "/test", httpResponse)
+        result shouldBe Some(expected)
+      }
+
+      "the http response contains a 500 with an error response body" in {
+        val errorResponseJson = Json.parse(
+          """
+            |{
+            |  "code": "TEST_CODE",
+            |  "reason": "some reason"
+            |}
+          """.
+            stripMargin)
+        val expected = GenericError(DownstreamError)
+
+        val httpResponse = HttpResponse(INTERNAL_SERVER_ERROR, Some(errorResponseJson))
+        val result = submitEOPSDeclarationHttpReads.read(POST, "/test", httpResponse)
+        result shouldBe Some(expected)
+      }
+
+      "the http response contains a 503 with an error response body" in {
+        val errorResponseJson = Json.parse(
+          """
+            |{
+            |  "code": "TEST_CODE",
+            |  "reason": "some reason"
+            |}
+          """.
+            stripMargin)
+        val expected = GenericError(ServiceUnavailableError)
+
+        val httpResponse = HttpResponse(SERVICE_UNAVAILABLE, Some(errorResponseJson))
+        val result = submitEOPSDeclarationHttpReads.read(POST, "/test", httpResponse)
+        result shouldBe Some(expected)
+      }
     }
 
     "return multiple errors" when {
@@ -97,7 +177,7 @@ class SubmitEOPSDeclarationHttpParserSpec extends HttpParserSpec {
           """.stripMargin)
         val expected = MultipleBVRErrors(Seq(Error("TEST_ID_1", ""), Error("TEST_ID_2", "")))
 
-        val httpResponse = HttpResponse(BAD_REQUEST, Some(errorResponseJson))
+        val httpResponse = HttpResponse(FORBIDDEN, Some(errorResponseJson))
         val result = submitEOPSDeclarationHttpReads.read(POST, "/test", httpResponse)
         result shouldBe Some(expected)
       }
