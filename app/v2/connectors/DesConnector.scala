@@ -17,8 +17,9 @@
 package v2.connectors
 
 import java.time.LocalDate
-
 import javax.inject.{Inject, Singleton}
+
+import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -30,6 +31,8 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class DesConnector @Inject()(http: HttpClient,
                              appConfig: AppConfig) {
+
+  val logger = Logger(this.getClass)
 
   private[connectors] def desHeaderCarrier(implicit hc: HeaderCarrier): HeaderCarrier = hc
     .copy(authorization = Some(Authorization(s"Bearer ${appConfig.desToken}")))

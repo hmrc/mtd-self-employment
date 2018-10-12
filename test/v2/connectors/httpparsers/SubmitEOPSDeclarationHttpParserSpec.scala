@@ -175,7 +175,7 @@ class SubmitEOPSDeclarationHttpParserSpec extends HttpParserSpec {
             |  }
             |}
           """.stripMargin)
-        val expected = MultipleBVRErrors(Seq(Error("TEST_ID_1", ""), Error("TEST_ID_2", "")))
+        val expected = BVRErrors(Seq(Error("TEST_ID_1", ""), Error("TEST_ID_2", "")))
 
         val httpResponse = HttpResponse(FORBIDDEN, Some(errorResponseJson))
         val result = submitEOPSDeclarationHttpReads.read(POST, "/test", httpResponse)

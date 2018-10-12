@@ -14,19 +14,10 @@
  * limitations under the License.
  */
 
-package v2.models.errors
+package v2.models
 
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
+import java.time.LocalDate
 
-trait MtdError
+import uk.gov.hmrc.domain.Nino
 
-case class Error(code: String, message: String) extends MtdError
-
-object Error {
-  implicit val writes: Writes[Error] = Json.writes[Error]
-  implicit val reads: Reads[Error] = (
-    (__ \ "code").read[String] and
-      (__ \ "reason").read[String]
-    ) (Error.apply _)
-}
+case class EopsDeclarationSubmission(nino: Nino, from: LocalDate, to: LocalDate, selfEmploymentId: String)
