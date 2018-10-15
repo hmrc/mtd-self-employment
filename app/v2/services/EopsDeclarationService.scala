@@ -49,7 +49,7 @@ class EopsDeclarationService @Inject()(connector: DesConnector){
   private val desErrorToMtdError: Map[String, Error] = Map(
     "NOT_FOUND" -> NotFoundError,
     "INVALID_IDTYPE" -> DownstreamError,
-    "INVALID_IDVALUE" -> InvalidNinoError,
+    "INVALID_IDVALUE" -> NinoFormatError,
     "INVALID_ACCOUNTINGPERIODSTARTDATE" -> InvalidStartDateError,
     "INVALID_ACCOUNTINGPERIODENDDATE" -> InvalidEndDateError,
     "CONFLICT" -> ConflictError,
@@ -61,11 +61,11 @@ class EopsDeclarationService @Inject()(connector: DesConnector){
   )
 
   private val desBvrErrorToMtdError: Map[String, Error] = Map(
-    "C55317" -> RuleClass4Over16,
-    "C55318" -> RuleClass4PensionAge,
     "C55008" -> RuleMismatchStartDate,
     "C55013" -> RuleMismatchEndDate,
     "C55014" -> RuleMismatchEndDate,
-    "C55316" -> RuleConsolidatedExpenses
+    "C55316" -> RuleConsolidatedExpenses,
+    "C55317" -> RuleClass4Over16,
+    "C55318" -> RuleClass4PensionAge
   )
 }

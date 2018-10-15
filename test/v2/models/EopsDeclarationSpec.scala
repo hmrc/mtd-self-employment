@@ -18,32 +18,34 @@ package v2.models
 
 import play.api.libs.json.Json
 import support.UnitSpec
+import v2.models.inbound.EopsDeclaration
 import v2.models.utils.JsonErrorValidators
 
-class EOPSDeclarationSpec extends UnitSpec with JsonErrorValidators {
+class EopsDeclarationSpec extends UnitSpec with JsonErrorValidators {
 
   "reads" should {
     "return an EOPSDeclaration model" when {
       "correct json is supplied and the value for 'finalised' is true" in {
         val json = Json.parse("""{ "finalised": true }""")
 
-        val model = EOPSDeclaration.reads.reads(json).get
-        model shouldBe EOPSDeclaration(true)
+        val model = EopsDeclaration.reads.reads(json).get
+        model shouldBe EopsDeclaration(true)
       }
 
       "correct json is supplied and the value for 'finalised' is false" in {
         val json = Json.parse("""{ "finalised": false }""")
 
-        val model = EOPSDeclaration.reads.reads(json).get
-        model shouldBe EOPSDeclaration(false)
+        val model = EopsDeclaration.reads.reads(json).get
+        model shouldBe EopsDeclaration(false)
       }
     }
 
+
     val eopsDeclarationJson = Json.parse("""{ "finalised": true }""")
 
-    testMandatoryProperty[EOPSDeclaration](eopsDeclarationJson)("/finalised")
+    testMandatoryProperty[EopsDeclaration](eopsDeclarationJson)("/finalised")
 
-    testPropertyType[EOPSDeclaration](eopsDeclarationJson)(
+    testPropertyType[EopsDeclaration](eopsDeclarationJson)(
       path = "/finalised",
       replacement = 1.toJson,
       expectedError = JsonError.BOOLEAN_FORMAT_EXCEPTION

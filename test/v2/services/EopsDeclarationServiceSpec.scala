@@ -45,8 +45,8 @@ class EopsDeclarationServiceSpec extends ServiceSpec {
         MockDesConnector.submitEOPSDeclaration(nino.nino, from, to, selfEmploymentId)
           .returns(Future.successful(None))
 
-        val result: Option[ErrorResponse] = await(service.submit(EopsDeclarationSubmission(nino,
-          from, to, selfEmploymentId)))
+        val result: Option[ErrorResponse] = await(service.submit(
+          EopsDeclarationSubmission(nino, selfEmploymentId, from, to)))
 
         result shouldBe None
       }
@@ -59,12 +59,15 @@ class EopsDeclarationServiceSpec extends ServiceSpec {
           Error("INVALID_ACCOUNTINGPERIODSTARTDATE", "some reason")))
 
         MockDesConnector.submitEOPSDeclaration(nino.nino, from, to, selfEmploymentId)
-          .returns(Future{Some(desResponse)})
+          .returns(Future {
+            Some(desResponse)
+          })
 
-        val expected = ErrorResponse(BadRequestError, Some(Seq(InvalidEndDateError,InvalidStartDateError)))
+        val expected = ErrorResponse(BadRequestError, Some(Seq(InvalidEndDateError, InvalidStartDateError)))
 
-        val result: Option[ErrorResponse] = await(service.submit(EopsDeclarationSubmission(nino,
-          from, to, selfEmploymentId)))
+        val result: Option[ErrorResponse] = await(service.submit(
+          EopsDeclarationSubmission(nino, selfEmploymentId, from, to)))
+
 
         result shouldBe Some(expected)
       }
@@ -77,12 +80,14 @@ class EopsDeclarationServiceSpec extends ServiceSpec {
           Error("C55318", "some reason")))
 
         MockDesConnector.submitEOPSDeclaration(nino.nino, from, to, selfEmploymentId)
-          .returns(Future{Some(desResponse)})
+          .returns(Future {
+            Some(desResponse)
+          })
 
-        val expected = ErrorResponse(BVRError, Some(Seq(RuleClass4Over16,RuleClass4PensionAge)))
+        val expected = ErrorResponse(BVRError, Some(Seq(RuleClass4Over16, RuleClass4PensionAge)))
 
-        val result: Option[ErrorResponse] = await(service.submit(EopsDeclarationSubmission(nino,
-          from, to, selfEmploymentId)))
+        val result: Option[ErrorResponse] = await(service.submit(
+          EopsDeclarationSubmission(nino, selfEmploymentId, from, to)))
 
         result shouldBe Some(expected)
       }
@@ -94,12 +99,14 @@ class EopsDeclarationServiceSpec extends ServiceSpec {
         val desResponse = BVRErrors(Seq(Error("C55317", "some reason")))
 
         MockDesConnector.submitEOPSDeclaration(nino.nino, from, to, selfEmploymentId)
-          .returns(Future{Some(desResponse)})
+          .returns(Future {
+            Some(desResponse)
+          })
 
         val expected = ErrorResponse(RuleClass4Over16, None)
 
-        val result: Option[ErrorResponse] = await(service.submit(EopsDeclarationSubmission(nino,
-          from, to, selfEmploymentId)))
+        val result: Option[ErrorResponse] = await(service.submit(
+          EopsDeclarationSubmission(nino, selfEmploymentId, from, to)))
 
         result shouldBe Some(expected)
       }
@@ -110,7 +117,7 @@ class EopsDeclarationServiceSpec extends ServiceSpec {
       ("INVALID_IDTYPE", "downstream", DownstreamError),
       ("SERVICE_UNAVAILABLE", "service unavailable", ServiceUnavailableError),
       ("SERVER_ERROR", "downstream", DownstreamError),
-      ("INVALID_IDVALUE", "invalid nino", InvalidNinoError),
+      ("INVALID_IDVALUE", "invalid nino", NinoFormatError),
       ("INVALID_ACCOUNTINGPERIODENDDATE", "invalid end date", InvalidEndDateError),
       ("INVALID_ACCOUNTINGPERIODSTARTDATE", "invalid start date", InvalidStartDateError),
       ("CONFLICT", "duplicate submission", ConflictError),
@@ -128,8 +135,8 @@ class EopsDeclarationServiceSpec extends ServiceSpec {
             MockDesConnector.submitEOPSDeclaration(nino.nino, from, to, selfEmploymentId)
               .returns(error)
 
-            val result: Option[ErrorResponse]  = await(service.submit(EopsDeclarationSubmission(nino,
-              from, to, selfEmploymentId)))
+            val result: Option[ErrorResponse] = await(service.submit(
+              EopsDeclarationSubmission(nino, selfEmploymentId, from, to)))
 
             result shouldBe Some(ErrorResponse(mtdError, None))
           }
