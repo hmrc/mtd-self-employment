@@ -14,19 +14,12 @@
  * limitations under the License.
  */
 
-package v2.controllers
+package v2.models.inbound
 
-import javax.inject.{Inject, Singleton}
-import play.api.mvc.{Action, AnyContent}
-import v2.services.{EnrolmentsAuthService, MtdIdLookupService}
+import play.api.libs.json.{Json, Reads}
 
-import scala.concurrent.Future
+case class EopsDeclaration(finalised: Boolean)
 
-@Singleton
-class SampleController @Inject()(val authService: EnrolmentsAuthService,
-                                 val lookupService: MtdIdLookupService) extends AuthorisedController {
-
-  def doSomething(nino: String): Action[AnyContent] = authorisedAction(nino).async { implicit request =>
-    Future.successful(Ok(request.mtdId))
-  }
+object EopsDeclaration {
+  implicit val reads: Reads[EopsDeclaration] = Json.reads[EopsDeclaration]
 }

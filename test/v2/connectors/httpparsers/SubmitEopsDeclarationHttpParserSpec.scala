@@ -21,7 +21,7 @@ import uk.gov.hmrc.http.HttpResponse
 import v2.connectors.httpparsers.SubmitEOPSDeclarationHttpParser.submitEOPSDeclarationHttpReads
 import v2.models.errors._
 
-class SubmitEOPSDeclarationHttpParserSpec extends HttpParserSpec {
+class SubmitEopsDeclarationHttpParserSpec extends HttpParserSpec {
 
   "read" should {
     "return a None" when {

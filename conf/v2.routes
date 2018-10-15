@@ -1,1 +1,1 @@
-GET        /sample/:nino        v2.controllers.SampleController.doSomething(nino:String)
+POST        /self-assessment/ni/:nino/self-employments/:selfEmploymentId/end-of-period-statements/from/:from/to/:to        v2.controllers.EopsDeclarationController.submit(nino: String, selfEmploymentId: String, from: String, to: String)
