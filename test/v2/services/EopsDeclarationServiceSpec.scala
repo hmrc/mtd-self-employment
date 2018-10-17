@@ -63,7 +63,7 @@ class EopsDeclarationServiceSpec extends ServiceSpec {
             Some(desResponse)
           })
 
-        val expected = ErrorResponse(BadRequestError, Some(Seq(InvalidEndDateError, InvalidStartDateError)))
+        val expected = ErrorResponse(BadRequestError, Some(Seq( v2.models.errors.SubmitEopsDeclarationErrors.InvalidEndDateError,  v2.models.errors.SubmitEopsDeclarationErrors.InvalidStartDateError)))
 
         val result: Option[ErrorResponse] = await(service.submit(
           EopsDeclarationSubmission(nino, selfEmploymentId, from, to)))
@@ -118,8 +118,8 @@ class EopsDeclarationServiceSpec extends ServiceSpec {
       ("SERVICE_UNAVAILABLE", "service unavailable", ServiceUnavailableError),
       ("SERVER_ERROR", "downstream", DownstreamError),
       ("INVALID_IDVALUE", "invalid nino", NinoFormatError),
-      ("INVALID_ACCOUNTINGPERIODENDDATE", "invalid end date", InvalidEndDateError),
-      ("INVALID_ACCOUNTINGPERIODSTARTDATE", "invalid start date", InvalidStartDateError),
+      ("INVALID_ACCOUNTINGPERIODENDDATE", "invalid end date",  v2.models.errors.SubmitEopsDeclarationErrors.InvalidEndDateError),
+      ("INVALID_ACCOUNTINGPERIODSTARTDATE", "invalid start date",  v2.models.errors.SubmitEopsDeclarationErrors.InvalidStartDateError),
       ("CONFLICT", "duplicate submission", ConflictError),
       ("EARLY_SUBMISSION", "early submission", EarlySubmissionError),
       ("LATE_SUBMISSION", "late submission", LateSubmissionError)

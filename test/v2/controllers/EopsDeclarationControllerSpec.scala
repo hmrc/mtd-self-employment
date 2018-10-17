@@ -71,8 +71,8 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
     "return a 400 (BAD_REQUEST) with a single error" when {
 
       val badRequestErrors = List(
-        InvalidStartDateError,
-        InvalidEndDateError,
+        v2.models.errors.SubmitEopsDeclarationErrors.InvalidStartDateError,
+        v2.models.errors.SubmitEopsDeclarationErrors.InvalidEndDateError,
         InvalidRangeError,
         BadRequestError,
         InvalidNinoError,
@@ -90,7 +90,7 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
     "return a 400 (BAD_REQUEST) with multiple errors" when {
 
       "when a BadRequestError is generated" in new Test {
-        val badRequestErrorContainer = ErrorResponse(BadRequestError, Some(Seq(MissingStartDateError,
+        val badRequestErrorContainer = ErrorResponse(BadRequestError, Some(Seq(v2.models.errors.SubmitEopsDeclarationErrors.MissingStartDateError,
           InvalidEndDateError,
           NinoFormatError))
         )

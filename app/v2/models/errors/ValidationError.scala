@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package v2.models.errors
 
 case class ValidationError(code: String, message: String)
