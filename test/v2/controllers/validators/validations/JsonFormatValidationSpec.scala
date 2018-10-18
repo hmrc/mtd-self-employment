@@ -17,7 +17,7 @@
 package v2.controllers.validators.validations
 
 import play.api.libs.json.{Json, Reads}
-import play.api.mvc.{AnyContentAsJson, AnyContentAsText}
+import play.api.mvc.AnyContentAsJson
 import support.UnitSpec
 import v2.models.errors.NEWBadRequestError
 import v2.models.utils.JsonErrorValidators
@@ -25,6 +25,7 @@ import v2.models.utils.JsonErrorValidators
 class JsonFormatValidationSpec extends UnitSpec with JsonErrorValidators {
 
   case class TestDataObject(fieldOne: String, fieldTwo: String)
+
   implicit val testDataObjectReads: Reads[TestDataObject] = Json.reads[TestDataObject]
 
   "validate" should {

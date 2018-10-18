@@ -19,7 +19,7 @@ package v2.controllers.validators.validations
 import v2.models.errors.ValidationError
 import v2.validations.NoValidationErrors
 
-object DateFormatValidation {
+object DateFormatValidation extends Validation {
 
   private val dateRegex = "([0-9]{4}\\-[0-9]{2}\\-[0-9]{2})"
 

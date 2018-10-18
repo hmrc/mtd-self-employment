@@ -99,12 +99,14 @@ class EopsDeclarationInputDataValidatorSpec extends UnitSpec {
 
     "should run level 2 validations" when {
       "when all level 1 validations pass" in new Test {
-        val invalidJson = AnyContentAsJson(Json.obj("finalised" -> false))
-        val inputData = EopsDeclarationInputData(validNino, validFromDate, validToDate, invalidJson)
+        println("ECHO")
+        val invalidValuesInJson = AnyContentAsJson(Json.obj("fin" -> 123))
+        val inputData = EopsDeclarationInputData(validNino, validFromDate, validToDate, invalidValuesInJson)
 
         val result = validator.validate(inputData)
-//        result.isEmpty shouldBe false // TODO
-//        result.head shouldBe  // TODO
+        println(result)
+        result.isEmpty shouldBe false
+        result.head shouldBe NEWBadRequestError
       }
     }
 

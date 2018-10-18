@@ -38,6 +38,7 @@ class EopsDeclarationInputDataValidator extends Validator[EopsDeclarationInputDa
   }
 
   private def levelTwoValidations: EopsDeclarationInputData => List[List[ValidationError]] = (data: EopsDeclarationInputData) => {
+    println("level2")
     List(
       DateRangeValidation.validate(LocalDate.parse(data.from), LocalDate.parse(data.to)),
       JsonFormatValidation.validate[EopsDeclaration](data.body)

@@ -14,26 +14,10 @@
  * limitations under the License.
  */
 
-package v2.controllers.validators
+package v2.controllers.validators.validations
 
-import v2.models.errors.ValidationError
-import v2.models.inbound.InputData
+trait Validation {
 
-trait Validator[A <: InputData] {
-
-  type ValidationLevel[T] = T => List[ValidationError]
-
-  def validate(data: A): List[ValidationError]
-
-  def run[A <: InputData](validationSet: List[A => List[List[ValidationError]]], data: A): List[ValidationError] = {
-
-    validationSet match {
-      case Nil => List()
-      case thisLevel :: remainingLevels => thisLevel(data).flatten match {
-        case x if x.isEmpty => run(remainingLevels, data)
-        case x if x.nonEmpty => x
-      }
-    }
-  }
+  def validate = {}
 
 }
