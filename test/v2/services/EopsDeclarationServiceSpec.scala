@@ -117,7 +117,7 @@ class EopsDeclarationServiceSpec extends ServiceSpec {
       ("INVALID_IDTYPE", "downstream", DownstreamError),
       ("SERVICE_UNAVAILABLE", "service unavailable", ServiceUnavailableError),
       ("SERVER_ERROR", "downstream", DownstreamError),
-      ("INVALID_IDVALUE", "invalid nino", NinoFormatError),
+      ("INVALID_IDVALUE", "invalid nino", v2.models.errors.SubmitEopsDeclarationErrors.NinoFormatError),
       ("INVALID_ACCOUNTINGPERIODENDDATE", "invalid end date",  v2.models.errors.SubmitEopsDeclarationErrors.InvalidEndDateError),
       ("INVALID_ACCOUNTINGPERIODSTARTDATE", "invalid start date",  v2.models.errors.SubmitEopsDeclarationErrors.InvalidStartDateError),
       ("CONFLICT", "duplicate submission", ConflictError),

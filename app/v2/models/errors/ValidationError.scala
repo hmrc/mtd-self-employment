@@ -19,11 +19,15 @@ package v2.models.errors
 case class ValidationError(code: String, message: String)
 
 // Nino Errors
-object NinoValidationError extends ValidationError("FORMAT_NINO", "The NINO format is invalid")
+object NinoFormatError extends ValidationError("FORMAT_NINO", "The NINO format is invalid")
 
 // Date Errors
 object MissingStartDateError extends ValidationError("MISSING_START_DATE", "Missing account period start date")
 object MissingEndDateError extends ValidationError("MISSING_END_DATE", "Missing account period end date")
 object InvalidStartDateError extends ValidationError("FORMAT_START_DATE", "Invalid account period start date")
 object InvalidEndDateError extends ValidationError("FORMAT_END_DATE", "Invalid account period end date")
+object InvalidRangeError extends ValidationError("RANGE_INVALID", "The start date must be the same day or before the from date")
 
+
+// TODO See if this should be a JSON format or something error
+object NEWBadRequestError extends ValidationError("INVALID_REQUEST", "Invalid request")

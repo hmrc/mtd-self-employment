@@ -54,11 +54,11 @@ class EopsDeclarationController @Inject()(val authService: EnrolmentsAuthService
     errorResponse.error match {
       case v2.models.errors.SubmitEopsDeclarationErrors.InvalidStartDateError
            | v2.models.errors.SubmitEopsDeclarationErrors.InvalidEndDateError
-           | InvalidRangeError
+           | v2.models.errors.SubmitEopsDeclarationErrors.InvalidRangeError
            | BadRequestError
            | InvalidNinoError
            | EarlySubmissionError
-           | NinoFormatError
+           | v2.models.errors.SubmitEopsDeclarationErrors.NinoFormatError
            | LateSubmissionError =>
         BadRequest(Json.toJson(errorResponse))
       case ConflictError

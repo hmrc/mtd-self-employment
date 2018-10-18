@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package v2.validations
+package v2.controllers.validators.validations
 
 import uk.gov.hmrc.domain.Nino
-import v2.models.errors.{NinoValidationError, ValidationError}
+import v2.models.errors.{NinoFormatError, ValidationError}
+import v2.validations.NoValidationErrors
 
 object NinoValidation {
 
   def validate(nino: String): List[ValidationError] = {
-    if (!Nino.isValid(nino)) List(NinoValidationError) else List()
+    if (!Nino.isValid(nino)) List(NinoFormatError) else NoValidationErrors
   }
 
 }

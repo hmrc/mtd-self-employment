@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package v2.validations
+package v2.controllers.validators.validations
 
 import support.UnitSpec
-import v2.models.errors.{MissingStartDateError, NinoValidationError}
+import v2.models.errors.{MissingStartDateError, NinoFormatError}
 import v2.models.utils.JsonErrorValidators
 
 class NonEmptyValidationSpec extends UnitSpec {

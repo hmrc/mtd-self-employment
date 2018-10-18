@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package v2.validations
+package v2.controllers.validators.validations
 
 import support.UnitSpec
 import v2.models.errors.InvalidStartDateError

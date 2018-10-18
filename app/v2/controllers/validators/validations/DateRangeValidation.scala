@@ -14,8 +14,17 @@
  * limitations under the License.
  */
 
-package v2.models.inbound
+package v2.controllers.validators.validations
 
-import play.api.mvc.AnyContentAsJson
+import java.time.LocalDate
 
-case class EopsDeclarationInputData(nino: String, from: String, to: String, body: AnyContentAsJson) extends InputData
+import v2.models.errors.{InvalidRangeError, ValidationError}
+import v2.validations.NoValidationErrors
+
+object DateRangeValidation {
+
+  def validate(start: LocalDate, end: LocalDate): List[ValidationError] = {
+    if (end.isBefore(start)) List(InvalidRangeError) else NoValidationErrors
+  }
+
+}

@@ -14,8 +14,19 @@
  * limitations under the License.
  */
 
-package v2.models.inbound
+package v2.controllers.validators.validations
 
-import play.api.mvc.AnyContentAsJson
+import v2.models.errors.ValidationError
+import v2.validations.NoValidationErrors
 
-case class EopsDeclarationInputData(nino: String, from: String, to: String, body: AnyContentAsJson) extends InputData
+object DateFormatValidation {
+
+  private val dateRegex = "([0-9]{4}\\-[0-9]{2}\\-[0-9]{2})"
+
+  def validate(date: String, dateError: ValidationError): List[ValidationError] = {
+
+    if (date.matches(dateRegex)) NoValidationErrors else List(dateError)
+
+  }
+
+}

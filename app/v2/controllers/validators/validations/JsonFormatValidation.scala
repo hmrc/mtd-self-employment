@@ -14,15 +14,24 @@
  * limitations under the License.
  */
 
-package v2.validations
+package v2.controllers.validators.validations
 
-import v2.models.errors.ValidationError
+import play.api.libs.json._
+import play.api.mvc.AnyContentAsJson
+import v2.models.errors.{NEWBadRequestError, ValidationError}
+import v2.validations.NoValidationErrors
 
-object NonEmptyValidation {
+object JsonFormatValidation {
 
-  def validate(str: String, specificError: ValidationError): List[ValidationError] = {
+  def validate[A](data: AnyContentAsJson)(implicit reads: Reads[A]): List[ValidationError] = {
 
-    if (str.nonEmpty) NoValidationErrors else List(specificError)
+    data.asJson.map(_.validate[A]) match {
+      case Some(jsonResult) => jsonResult match {
+        case JsSuccess(_, _) => NoValidationErrors
+        case _ => List(NEWBadRequestError)
+      }
+      case None => List(NEWBadRequestError)
+    }
 
   }
 

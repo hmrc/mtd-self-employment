@@ -14,18 +14,26 @@
  * limitations under the License.
  */
 
-package v2.validations
+package v2.controllers.validators
 
 import v2.models.errors.ValidationError
+import v2.models.inbound.InputData
 
-object DateFormatValidation {
+trait Validator[A <: InputData] {
 
-  private val dateRegex = "([0-9]{4}\\-[0-9]{2}\\-[0-9]{2})"
+  type ValidationLevel[T] = T => List[ValidationError]
 
-  def validate(date: String, dateError: ValidationError): List[ValidationError] = {
+  def validate(data: A): List[ValidationError]
 
-    if (date.matches(dateRegex)) NoValidationErrors else List(dateError)
-
+  // TODO Test
+  protected def run[A <: InputData](validationSet: List[A => List[List[ValidationError]]], data: A): List[ValidationError] = {
+    validationSet match {
+      case Nil => List()
+      case thisLevel :: remainingLevels => thisLevel(data) match {
+        case x if x.nonEmpty => x.flatten
+        case x if x.isEmpty => run(remainingLevels, data)
+      }
+    }
   }
 
 }

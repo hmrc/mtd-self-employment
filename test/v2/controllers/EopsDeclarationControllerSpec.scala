@@ -73,11 +73,11 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
       val badRequestErrors = List(
         v2.models.errors.SubmitEopsDeclarationErrors.InvalidStartDateError,
         v2.models.errors.SubmitEopsDeclarationErrors.InvalidEndDateError,
-        InvalidRangeError,
+        v2.models.errors.SubmitEopsDeclarationErrors.InvalidRangeError,
         BadRequestError,
         InvalidNinoError,
         EarlySubmissionError,
-        NinoFormatError,
+        v2.models.errors.SubmitEopsDeclarationErrors.NinoFormatError,
         LateSubmissionError
       )
 
@@ -92,7 +92,7 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
       "when a BadRequestError is generated" in new Test {
         val badRequestErrorContainer = ErrorResponse(BadRequestError, Some(Seq(v2.models.errors.SubmitEopsDeclarationErrors.MissingStartDateError,
           InvalidEndDateError,
-          NinoFormatError))
+          v2.models.errors.SubmitEopsDeclarationErrors.NinoFormatError))
         )
 
         val eopsDeclarationSubmission = EopsDeclarationSubmission(Nino(nino), selfEmploymentId, LocalDate.parse(from), LocalDate.parse(to))
@@ -175,6 +175,7 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
 
         val result = target.submit(nino, selfEmploymentId, from, to)(FakeRequest())
         status(result) shouldBe NOT_FOUND
+
       }
     }
 

@@ -49,7 +49,7 @@ class EopsDeclarationService @Inject()(connector: DesConnector){
   private val desErrorToMtdError: Map[String, Error] = Map(
     "NOT_FOUND" -> NotFoundError,
     "INVALID_IDTYPE" -> DownstreamError,
-    "INVALID_IDVALUE" -> NinoFormatError,
+    "INVALID_IDVALUE" -> v2.models.errors.SubmitEopsDeclarationErrors.NinoFormatError,
     "INVALID_ACCOUNTINGPERIODSTARTDATE" ->  v2.models.errors.SubmitEopsDeclarationErrors.InvalidStartDateError,
     "INVALID_ACCOUNTINGPERIODENDDATE" ->  v2.models.errors.SubmitEopsDeclarationErrors.InvalidEndDateError,
     "CONFLICT" -> ConflictError,

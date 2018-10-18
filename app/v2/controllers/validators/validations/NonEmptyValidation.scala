@@ -14,8 +14,17 @@
  * limitations under the License.
  */
 
-package v2.models.inbound
+package v2.controllers.validators.validations
 
-import play.api.mvc.AnyContentAsJson
+import v2.models.errors.ValidationError
+import v2.validations.NoValidationErrors
 
-case class EopsDeclarationInputData(nino: String, from: String, to: String, body: AnyContentAsJson) extends InputData
+object NonEmptyValidation {
+
+  def validate(str: String, specificError: ValidationError): List[ValidationError] = {
+
+    if (str.nonEmpty) NoValidationErrors else List(specificError)
+
+  }
+
+}
