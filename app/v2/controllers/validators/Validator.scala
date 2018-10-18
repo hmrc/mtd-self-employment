@@ -25,7 +25,7 @@ trait Validator[A <: InputData] {
 
   def validate(data: A): List[ValidationError]
 
-  def run[A <: InputData](validationSet: List[A => List[List[ValidationError]]], data: A): List[ValidationError] = {
+  def run(validationSet: List[A => List[List[ValidationError]]], data: A): List[ValidationError] = {
 
     validationSet match {
       case Nil => List()

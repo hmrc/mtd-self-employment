@@ -19,3 +19,4 @@ package v2.models.inbound
 import play.api.mvc.AnyContentAsJson
 
 case class EopsDeclarationInputData(nino: String, from: String, to: String, body: AnyContentAsJson) extends InputData
+
