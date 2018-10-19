@@ -136,7 +136,7 @@ private case class TestInputData(fieldOne: String, fieldTwo: String) extends Inp
 
 // Create a Validator based off the trait to be able to test it
 private class TestValidator extends Validator[TestInputData] {
-  override def validate(data: TestInputData): List[ValidationError] = {
+  override def validate(data: TestInputData): List[MtdError] = {
     run(List(), data)
   }
 }

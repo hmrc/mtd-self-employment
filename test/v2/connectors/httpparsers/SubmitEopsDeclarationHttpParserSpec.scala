@@ -41,7 +41,7 @@ class SubmitEopsDeclarationHttpParserSpec extends HttpParserSpec {
             |  "reason": "some reason"
             |}
           """.stripMargin)
-        val expected = SingleError(Error("TEST_CODE", "some reason"))
+        val expected = SingleError(MtdError("TEST_CODE", "some reason"))
 
         val httpResponse = HttpResponse(BAD_REQUEST, Some(errorResponseJson))
         val result = submitEOPSDeclarationHttpReads.read(POST, "/test", httpResponse)
@@ -56,7 +56,7 @@ class SubmitEopsDeclarationHttpParserSpec extends HttpParserSpec {
             |  "reason": "some reason"
             |}
           """.stripMargin)
-        val expected = SingleError(Error("TEST_CODE", "some reason"))
+        val expected = SingleError(MtdError("TEST_CODE", "some reason"))
 
         val httpResponse = HttpResponse(FORBIDDEN, Some(errorResponseJson))
         val result = submitEOPSDeclarationHttpReads.read(POST, "/test", httpResponse)
@@ -71,7 +71,7 @@ class SubmitEopsDeclarationHttpParserSpec extends HttpParserSpec {
             |  "reason": "some reason"
             |}
           """.stripMargin)
-        val expected = SingleError(Error("TEST_CODE", "some reason"))
+        val expected = SingleError(MtdError("TEST_CODE", "some reason"))
 
         val httpResponse = HttpResponse(CONFLICT, Some(errorResponseJson))
         val result = submitEOPSDeclarationHttpReads.read(POST, "/test", httpResponse)
@@ -146,7 +146,7 @@ class SubmitEopsDeclarationHttpParserSpec extends HttpParserSpec {
             |  ]
             |}
           """.stripMargin)
-        val expected = MultipleErrors(Seq(Error("TEST_CODE_1", "some reason"), Error("TEST_CODE_2", "some reason")))
+        val expected = MultipleErrors(Seq(MtdError("TEST_CODE_1", "some reason"), MtdError("TEST_CODE_2", "some reason")))
 
         val httpResponse = HttpResponse(BAD_REQUEST, Some(errorResponseJson))
         val result = submitEOPSDeclarationHttpReads.read(POST, "/test", httpResponse)
@@ -175,7 +175,7 @@ class SubmitEopsDeclarationHttpParserSpec extends HttpParserSpec {
             |  }
             |}
           """.stripMargin)
-        val expected = BVRErrors(Seq(Error("TEST_ID_1", ""), Error("TEST_ID_2", "")))
+        val expected = BVRErrors(Seq(MtdError("TEST_ID_1", ""), MtdError("TEST_ID_2", "")))
 
         val httpResponse = HttpResponse(FORBIDDEN, Some(errorResponseJson))
         val result = submitEOPSDeclarationHttpReads.read(POST, "/test", httpResponse)

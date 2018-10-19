@@ -77,7 +77,6 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
         BadRequestError,
         NinoFormatError,
         EarlySubmissionError,
-        NinoFormatError,
         LateSubmissionError
       )
 
@@ -195,7 +194,7 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
 
   }
 
-  def eopsErrorStatusTester(error: v2.models.errors.Error, expectedStatus: Int): Unit = {
+  def eopsErrorStatusTester(error: MtdError, expectedStatus: Int): Unit = {
     s"when a ${error.code} error occurs" in new Test {
       val eopsDeclarationSubmission = EopsDeclarationSubmission(Nino(nino), selfEmploymentId, LocalDate.parse(from), LocalDate.parse(to))
       MockedEopsDeclarationService.submit(eopsDeclarationSubmission).returns(Future.successful(Some(ErrorWrapper(error, None))))
