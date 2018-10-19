@@ -34,3 +34,5 @@ object NEWBadRequestError extends ValidationError("INVALID_REQUEST", "Invalid re
 
 // TODO Check where this should live - EOPSDeclartion specific
 object NotFinalisedDeclaration extends ValidationError("RULE_NOT_FINALISED", "The statement cannot be accepted without a declaration that it is finalised.")
+
+object SelfEmploymentIdError extends ValidationError("FORMAT_SELF_EMPLOYMENT_ID", "The format of the provided self-employment ID is invalid.")

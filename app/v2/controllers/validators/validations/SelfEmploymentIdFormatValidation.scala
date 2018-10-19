@@ -14,9 +14,19 @@
  * limitations under the License.
  */
 
-package v2.models.inbound
+package v2.controllers.validators.validations
 
-import play.api.mvc.AnyContentAsJson
+import v2.models.errors.{SelfEmploymentIdError, ValidationError}
+import v2.validations.NoValidationErrors
 
-case class EopsDeclarationInputData(nino: String, selfEmploymentId: String, from: String, to: String, body: AnyContentAsJson) extends InputData
+object SelfEmploymentIdFormatValidation extends Validation {
 
+  private val dateRegex = "^[A-Za-z0-9]{15}$"
+
+  def validate(selfEmploymentId: String): List[ValidationError] = {
+
+    if (selfEmploymentId.matches(dateRegex)) NoValidationErrors else List(SelfEmploymentIdError)
+
+  }
+
+}

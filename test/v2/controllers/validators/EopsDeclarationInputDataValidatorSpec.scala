@@ -25,6 +25,7 @@ import v2.models.inbound.EopsDeclarationInputData
 class EopsDeclarationInputDataValidatorSpec extends UnitSpec {
 
   val validNino = "AA123456A"
+  val validSelfEmploymentId = "X1AAAAAAAAAAAA5"
   val validFromDate = "2018-01-01"
   val validToDate = "2018-12-31"
   val validJsonBody = AnyContentAsJson(Json.obj("finalised" -> true))
@@ -37,7 +38,7 @@ class EopsDeclarationInputDataValidatorSpec extends UnitSpec {
 
     "return no errors" when {
       "when the uri is valid and the JSON payload is Valid" in new Test {
-        val inputData = EopsDeclarationInputData(validNino, validFromDate, validToDate, validJsonBody)
+        val inputData = EopsDeclarationInputData(validNino, validSelfEmploymentId, validFromDate, validToDate, validJsonBody)
 
         val result = validator.validate(inputData)
         result.isEmpty shouldBe true
@@ -48,16 +49,25 @@ class EopsDeclarationInputDataValidatorSpec extends UnitSpec {
 
       "when an invalid NINO is supplied" in new Test {
         val invalidNino = "ABCDEFGHIJKLM"
-        val inputData = EopsDeclarationInputData(invalidNino, validFromDate, validToDate, validJsonBody)
+        val inputData = EopsDeclarationInputData(invalidNino, validSelfEmploymentId, validFromDate, validToDate, validJsonBody)
 
         val result = validator.validate(inputData)
         result.size shouldBe 1
         result.head shouldBe NinoFormatError
       }
 
+      "when a self employment id with an invalid format is supplied" in new Test {
+        val invalidSelfEmploymentId = "dyuvarw7rwa734£$@£"
+        val inputData = EopsDeclarationInputData(validNino, invalidSelfEmploymentId, validFromDate, validToDate, validJsonBody)
+
+        val result = validator.validate(inputData)
+        result.size shouldBe 1
+        result.head shouldBe SelfEmploymentIdError
+      }
+
       "when a from date with an invalid format is supplied " in new Test {
         val invalidFormatFromDate = "ABCDEFGHIJKLM"
-        val inputData = EopsDeclarationInputData(validNino, invalidFormatFromDate, validToDate, validJsonBody)
+        val inputData = EopsDeclarationInputData(validNino, validSelfEmploymentId, invalidFormatFromDate, validToDate, validJsonBody)
 
         val result = validator.validate(inputData)
         result.size shouldBe 1
@@ -66,7 +76,7 @@ class EopsDeclarationInputDataValidatorSpec extends UnitSpec {
 
       "when a to date with an invalid format is supplied " in new Test {
         val invalidFormatToDate = "ABCDEFGHIJKLM"
-        val inputData = EopsDeclarationInputData(validNino, validFromDate, invalidFormatToDate, validJsonBody)
+        val inputData = EopsDeclarationInputData(validNino, validSelfEmploymentId, validFromDate, invalidFormatToDate, validJsonBody)
 
         val result = validator.validate(inputData)
         result.size shouldBe 1
@@ -75,7 +85,7 @@ class EopsDeclarationInputDataValidatorSpec extends UnitSpec {
 
       "when the declaration has not been finalised" in new Test {
         val invalidJson = AnyContentAsJson(Json.obj("finalised" -> false))
-        val inputData = EopsDeclarationInputData(validNino, validFromDate, validToDate, invalidJson)
+        val inputData = EopsDeclarationInputData(validNino, validSelfEmploymentId, validFromDate, validToDate, invalidJson)
 
         val result = validator.validate(inputData)
         result.isEmpty shouldBe false
@@ -87,7 +97,7 @@ class EopsDeclarationInputDataValidatorSpec extends UnitSpec {
     "return multiple errors" when {
       "when the from date is missing " in new Test {
         val emptyFromDate = ""
-        val inputData = EopsDeclarationInputData(validNino, emptyFromDate, validToDate, validJsonBody)
+        val inputData = EopsDeclarationInputData(validNino, validSelfEmploymentId, emptyFromDate, validToDate, validJsonBody)
 
         val result = validator.validate(inputData)
         result.size shouldBe 2
@@ -97,7 +107,7 @@ class EopsDeclarationInputDataValidatorSpec extends UnitSpec {
 
       "when the to date is missing " in new Test {
         val emptyToDate = ""
-        val inputData = EopsDeclarationInputData(validNino, validFromDate, emptyToDate, validJsonBody)
+        val inputData = EopsDeclarationInputData(validNino, validSelfEmploymentId, validFromDate, emptyToDate, validJsonBody)
 
         val result = validator.validate(inputData)
         result.size shouldBe 2
@@ -109,7 +119,7 @@ class EopsDeclarationInputDataValidatorSpec extends UnitSpec {
     "should run level 2 validations" when {
       "when all level 1 validations pass" in new Test {
         val invalidValuesInJson = AnyContentAsJson(Json.obj("fin" -> 123))
-        val inputData = EopsDeclarationInputData(validNino, validFromDate, validToDate, invalidValuesInJson)
+        val inputData = EopsDeclarationInputData(validNino, validSelfEmploymentId, validFromDate, validToDate, invalidValuesInJson)
 
         val result = validator.validate(inputData)
         result.isEmpty shouldBe false
@@ -124,7 +134,7 @@ class EopsDeclarationInputDataValidatorSpec extends UnitSpec {
         // Level 2 error
         val invalidJson = AnyContentAsJson(Json.obj("finalised" -> false))
 
-        val inputData = EopsDeclarationInputData(validNino, validFromDate, invalidFormatToDate, invalidJson)
+        val inputData = EopsDeclarationInputData(validNino, validSelfEmploymentId, validFromDate, invalidFormatToDate, invalidJson)
 
         val result = validator.validate(inputData)
         result.size shouldBe 1
@@ -139,7 +149,7 @@ class EopsDeclarationInputDataValidatorSpec extends UnitSpec {
         // Level 2 error exists
         val invalidJson = AnyContentAsJson(Json.obj("someMadeUpField" -> false))
 
-        val inputData = EopsDeclarationInputData(validNino, validFromDate, validToDate, invalidJson)
+        val inputData = EopsDeclarationInputData(validNino, validSelfEmploymentId, validFromDate, validToDate, invalidJson)
 
         val result = validator.validate(inputData)
         result.size shouldBe 1

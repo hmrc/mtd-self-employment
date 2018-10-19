@@ -32,7 +32,8 @@ class EopsDeclarationInputDataValidator extends Validator[EopsDeclarationInputDa
       NonEmptyValidation.validate(data.from, MissingStartDateError),
       NonEmptyValidation.validate(data.to, MissingEndDateError),
       DateFormatValidation.validate(data.from, InvalidStartDateError),
-      DateFormatValidation.validate(data.to, InvalidEndDateError)
+      DateFormatValidation.validate(data.to, InvalidEndDateError),
+      SelfEmploymentIdFormatValidation.validate(data.selfEmploymentId)
     )
   }
 
