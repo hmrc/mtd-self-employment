@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-package v2.controllers.validators.validations
+package v2.controllers.requestParsers.validators.validations
 
-import v2.models.errors.{MtdError, SelfEmploymentIdError}
+import uk.gov.hmrc.domain.Nino
+import v2.models.errors.{MtdError, NinoFormatError}
 import v2.validations.NoValidationErrors
 
-object SelfEmploymentIdFormatValidation extends Validation {
+object NinoValidation {
 
-  private val dateRegex = "^[A-Za-z0-9]{15}$"
-
-  def validate(selfEmploymentId: String): List[MtdError] = {
-
-    if (selfEmploymentId.matches(dateRegex)) NoValidationErrors else List(SelfEmploymentIdError)
-
+  def validate(nino: String): List[MtdError] = {
+    if (!Nino.isValid(nino)) List(NinoFormatError) else NoValidationErrors
   }
 
 }

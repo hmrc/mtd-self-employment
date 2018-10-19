@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-package v2.controllers.validators.validations
+package v2.controllers.requestParsers.validators.validations
 
-import play.api.libs.json._
-import play.api.mvc.AnyContentAsJson
-import v2.models.errors.{MtdError, NEWBadRequestError}
+import v2.models.errors.{MtdError, SelfEmploymentIdError}
 import v2.validations.NoValidationErrors
 
-object JsonFormatValidation {
+object SelfEmploymentIdFormatValidation extends Validation {
 
-  def validate[A](data: AnyContentAsJson)(implicit reads: Reads[A]): List[MtdError] = {
+  private val dateRegex = "^[A-Za-z0-9]{15}$"
 
-    data.json.validate[A] match {
-      case JsSuccess(_, _) => NoValidationErrors
-      case _ => List(NEWBadRequestError)
-    }
+  def validate(selfEmploymentId: String): List[MtdError] = {
+
+    if (selfEmploymentId.matches(dateRegex)) NoValidationErrors else List(SelfEmploymentIdError)
 
   }
 

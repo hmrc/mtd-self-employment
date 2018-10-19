@@ -14,21 +14,27 @@
  * limitations under the License.
  */
 
-package v2.controllers.validators.validations
+package v2.controllers.requestParsers.validators
 
-import play.api.mvc.AnyContentAsJson
-import v2.models.errors.{MtdError, NotFinalisedDeclaration}
-import v2.validations.NoValidationErrors
+import v2.models.errors.MtdError
+import v2.models.inbound.InputData
 
-object EopsDeclarationRequestDataValidation {
+trait Validator[A <: InputData] {
 
-  def validate(data: AnyContentAsJson): List[MtdError] = {
 
-    (data.json \ "finalised").asOpt[Boolean] match {
-      case Some(trueValue) if trueValue => NoValidationErrors
-      case _ => List(NotFinalisedDeclaration)
+  type ValidationLevel[T] = T => List[MtdError]
+
+  def validate(data: A): List[MtdError]
+
+  def run(validationSet: List[A => List[List[MtdError]]], data: A): List[MtdError] = {
+
+    validationSet match {
+      case Nil => List()
+      case thisLevel :: remainingLevels => thisLevel(data).flatten match {
+        case x if x.isEmpty => run(remainingLevels, data)
+        case x if x.nonEmpty => x
+      }
     }
-
   }
 
 }

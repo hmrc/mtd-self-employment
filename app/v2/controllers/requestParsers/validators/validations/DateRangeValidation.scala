@@ -14,27 +14,17 @@
  * limitations under the License.
  */
 
-package v2.controllers.validators
+package v2.controllers.requestParsers.validators.validations
 
-import v2.models.errors.MtdError
-import v2.models.inbound.InputData
+import java.time.LocalDate
 
-trait Validator[A <: InputData] {
+import v2.models.errors.{InvalidRangeError, MtdError}
+import v2.validations.NoValidationErrors
 
+object DateRangeValidation {
 
-  type ValidationLevel[T] = T => List[MtdError]
-
-  def validate(data: A): List[MtdError]
-
-  def run(validationSet: List[A => List[List[MtdError]]], data: A): List[MtdError] = {
-
-    validationSet match {
-      case Nil => List()
-      case thisLevel :: remainingLevels => thisLevel(data).flatten match {
-        case x if x.isEmpty => run(remainingLevels, data)
-        case x if x.nonEmpty => x
-      }
-    }
+  def validate(start: LocalDate, end: LocalDate): List[MtdError] = {
+    if (end.isBefore(start)) List(InvalidRangeError) else NoValidationErrors
   }
 
 }

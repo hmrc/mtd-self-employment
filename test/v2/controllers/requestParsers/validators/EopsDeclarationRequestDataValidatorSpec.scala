@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package v2.controllers.validators
+package v2.controllers.requestParsers.validators
 
 import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsJson

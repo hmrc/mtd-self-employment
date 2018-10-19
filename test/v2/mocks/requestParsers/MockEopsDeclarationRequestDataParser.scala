@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package v2.mocks.validators
+package v2.mocks.requestParsers
 
 import org.scalamock.handlers.CallHandler1
 import org.scalamock.scalatest.MockFactory
-import v2.controllers.requestParsers.validators.EopsDeclarationInputDataValidator
-import v2.models.errors.MtdError
+import v2.controllers.requestParsers.EopsDeclarationRequestDataParser
+import v2.models.EopsDeclarationSubmission
+import v2.models.errors.ErrorWrapper
 import v2.models.inbound.EopsDeclarationRequestData
 
-class MockEopsDeclarationRequestDataValidator extends MockFactory {
+trait MockEopsDeclarationRequestDataParser extends MockFactory {
 
-  val mockValidator = mock[EopsDeclarationInputDataValidator]
+  val mockRequestDataParser = mock[EopsDeclarationRequestDataParser]
 
-  object MockedEopsDeclarationInputDataValidator {
-    def validate(data: EopsDeclarationRequestData): CallHandler1[EopsDeclarationRequestData, List[MtdError]] = {
-      (mockValidator.validate(_: EopsDeclarationRequestData))
+  object MockedEopsDeclarationRequestDataParser {
+    def parseRequest(data: EopsDeclarationRequestData): CallHandler1[EopsDeclarationRequestData, Either[ErrorWrapper, EopsDeclarationSubmission]] = {
+      (mockRequestDataParser.parseRequest(_: EopsDeclarationRequestData))
         .expects(data)
     }
   }
-
 }

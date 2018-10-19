@@ -14,33 +14,37 @@
  * limitations under the License.
  */
 
-package v2.controllers.validators.validations
+package v2.controllers.requestParsers.validators.validations
+
+import java.time.LocalDate
 
 import support.UnitSpec
-import v2.models.errors.NinoFormatError
+import v2.models.errors.{InvalidRangeError, NinoFormatError}
 import v2.models.utils.JsonErrorValidators
 
-class NinoValidationSpec extends UnitSpec with JsonErrorValidators {
+class DateRangeValidationSpec extends UnitSpec with JsonErrorValidators {
 
   "validate" should {
     "return no errors" when {
-      "when a valid NINO is supplied" in {
+      "when a from date that is before the to date is supplied " in {
 
-        val validNino = "AA123456A"
-        val validationResult = NinoValidation.validate(validNino)
+        val fromDate = LocalDate.parse("2018-02-01")
+        val toDate = LocalDate.parse("2019-02-01")
+        val validationResult = DateRangeValidation.validate(fromDate, toDate)
         validationResult.isEmpty shouldBe true
 
       }
     }
 
     "return an error" when {
-      "when an invalid NINO is supplied" in {
+      "when the from date is after the to date" in {
 
-        val invalidNino = "AA123456ABCBBCBCBC"
-        val validationResult = NinoValidation.validate(invalidNino)
+        val fromDate = LocalDate.parse("2019-02-01")
+        val toDate = LocalDate.parse("2018-02-01")
+        val validationResult = DateRangeValidation.validate(fromDate, toDate)
         validationResult.isEmpty shouldBe false
         validationResult.length shouldBe 1
-        validationResult.head shouldBe NinoFormatError
+        validationResult.head shouldBe InvalidRangeError
 
       }
     }

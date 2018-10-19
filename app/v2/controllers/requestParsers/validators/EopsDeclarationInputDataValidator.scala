@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package v2.controllers.validators
+package v2.controllers.requestParsers.validators
 
 import java.time.LocalDate
 
-import v2.controllers.validators.validations._
+import v2.controllers.requestParsers.validators.validations._
 import v2.models.errors._
 import v2.models.inbound.{EopsDeclaration, EopsDeclarationRequestData}
 

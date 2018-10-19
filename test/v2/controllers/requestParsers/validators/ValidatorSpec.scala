@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package v2.controllers.validators
+package v2.controllers.requestParsers.validators
 
 import org.scalamock.scalatest.MockFactory
 import support.UnitSpec

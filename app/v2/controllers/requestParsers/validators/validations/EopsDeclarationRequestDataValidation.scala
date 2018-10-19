@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package v2.controllers.validators.validations
+package v2.controllers.requestParsers.validators.validations
 
-import java.time.LocalDate
-
-import v2.models.errors.{InvalidRangeError, MtdError}
+import play.api.mvc.AnyContentAsJson
+import v2.models.errors.{MtdError, NotFinalisedDeclaration}
 import v2.validations.NoValidationErrors
 
-object DateRangeValidation {
+object EopsDeclarationRequestDataValidation {
 
-  def validate(start: LocalDate, end: LocalDate): List[MtdError] = {
-    if (end.isBefore(start)) List(InvalidRangeError) else NoValidationErrors
+  def validate(data: AnyContentAsJson): List[MtdError] = {
+
+    (data.json \ "finalised").asOpt[Boolean] match {
+      case Some(trueValue) if trueValue => NoValidationErrors
+      case _ => List(NotFinalisedDeclaration)
+    }
+
   }
 
 }

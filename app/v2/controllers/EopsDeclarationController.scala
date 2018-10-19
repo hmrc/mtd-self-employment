@@ -16,38 +16,37 @@
 
 package v2.controllers
 
-import java.time.LocalDate
-
 import javax.inject.{Inject, Singleton}
-import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent}
-import uk.gov.hmrc.domain.Nino
-import v2.models.EopsDeclarationSubmission
+import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.{Action, AnyContentAsJson}
+import v2.controllers.requestParsers.EopsDeclarationRequestDataParser
 import v2.models.errors.SubmitEopsDeclarationErrors._
 import v2.models.errors._
+import v2.models.inbound.EopsDeclarationRequestData
 import v2.services.{EnrolmentsAuthService, EopsDeclarationService, MtdIdLookupService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 @Singleton
 class EopsDeclarationController @Inject()(val authService: EnrolmentsAuthService,
                                           val lookupService: MtdIdLookupService,
-                                          eopsDeclarationService: EopsDeclarationService
+                                          eopsDeclarationService: EopsDeclarationService,
+                                          requestDataParser: EopsDeclarationRequestDataParser
                                          ) extends AuthorisedController {
 
-  def submit(nino: String, selfEmploymentId: String, from: String, to: String): Action[AnyContent] = authorisedAction(nino).async { implicit request =>
+  def submit(nino: String, selfEmploymentId: String, from: String, to: String): Action[JsValue] =
+    authorisedAction(nino).async(parse.json) { implicit request =>
 
-    // TODO Validator bit
-    // Assuming validator response was success
-
-    val validatorResponse = EopsDeclarationSubmission(Nino(nino), selfEmploymentId, LocalDate.parse(from), LocalDate.parse(to))
-
-    eopsDeclarationService.submit(validatorResponse).map {
-      case None => NoContent
-      case Some(errorResponse) => processError(errorResponse)
+      requestDataParser.parseRequest(EopsDeclarationRequestData(nino, selfEmploymentId, from, to, AnyContentAsJson(request.body))) match {
+        case Right(eopsDeclarationSubmission) =>
+          eopsDeclarationService.submit(eopsDeclarationSubmission).map {
+            case None => NoContent
+            case Some(errorResponse) => processError(errorResponse)
+          }
+        case Left(validationErrorResponse) => Future { processError(validationErrorResponse) }
+      }
     }
-
-  }
 
   private def processError(errorResponse: ErrorWrapper) = {
     errorResponse.error match {

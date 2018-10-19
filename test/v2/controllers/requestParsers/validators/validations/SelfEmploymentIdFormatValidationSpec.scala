@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package v2.controllers.validators.validations
+package v2.controllers.requestParsers.validators.validations
 
 import support.UnitSpec
 import v2.models.errors.SelfEmploymentIdError

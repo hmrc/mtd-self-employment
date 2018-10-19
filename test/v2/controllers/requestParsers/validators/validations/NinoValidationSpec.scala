@@ -14,37 +14,33 @@
  * limitations under the License.
  */
 
-package v2.controllers.validators.validations
+package v2.controllers.requestParsers.validators.validations
 
 import support.UnitSpec
-import v2.models.errors.{MissingStartDateError, NinoFormatError}
+import v2.models.errors.NinoFormatError
 import v2.models.utils.JsonErrorValidators
 
-class NonEmptyValidationSpec extends UnitSpec {
+class NinoValidationSpec extends UnitSpec with JsonErrorValidators {
 
   "validate" should {
     "return no errors" when {
-      "when a non empty string is supplied" in {
+      "when a valid NINO is supplied" in {
 
-        val nonEmptyString = "SOMETHING SOMETHING"
-        val specificError = MissingStartDateError
-
-        val validationResult = NonEmptyValidation.validate(nonEmptyString, specificError)
+        val validNino = "AA123456A"
+        val validationResult = NinoValidation.validate(validNino)
         validationResult.isEmpty shouldBe true
 
       }
     }
 
-    "return the specific error supplied " when {
-      "when an empty string is supplied" in {
+    "return an error" when {
+      "when an invalid NINO is supplied" in {
 
-        val emptyString = ""
-        val specificError = MissingStartDateError
-
-        val validationResult = NonEmptyValidation.validate(emptyString, specificError)
+        val invalidNino = "AA123456ABCBBCBCBC"
+        val validationResult = NinoValidation.validate(invalidNino)
         validationResult.isEmpty shouldBe false
         validationResult.length shouldBe 1
-        validationResult.head shouldBe specificError
+        validationResult.head shouldBe NinoFormatError
 
       }
     }

@@ -14,37 +14,37 @@
  * limitations under the License.
  */
 
-package v2.controllers.validators.validations
-
-import java.time.LocalDate
+package v2.controllers.requestParsers.validators.validations
 
 import support.UnitSpec
-import v2.models.errors.{InvalidRangeError, NinoFormatError}
+import v2.models.errors.{MissingStartDateError, NinoFormatError}
 import v2.models.utils.JsonErrorValidators
 
-class DateRangeValidationSpec extends UnitSpec with JsonErrorValidators {
+class NonEmptyValidationSpec extends UnitSpec {
 
   "validate" should {
     "return no errors" when {
-      "when a from date that is before the to date is supplied " in {
+      "when a non empty string is supplied" in {
 
-        val fromDate = LocalDate.parse("2018-02-01")
-        val toDate = LocalDate.parse("2019-02-01")
-        val validationResult = DateRangeValidation.validate(fromDate, toDate)
+        val nonEmptyString = "SOMETHING SOMETHING"
+        val specificError = MissingStartDateError
+
+        val validationResult = NonEmptyValidation.validate(nonEmptyString, specificError)
         validationResult.isEmpty shouldBe true
 
       }
     }
 
-    "return an error" when {
-      "when the from date is after the to date" in {
+    "return the specific error supplied " when {
+      "when an empty string is supplied" in {
 
-        val fromDate = LocalDate.parse("2019-02-01")
-        val toDate = LocalDate.parse("2018-02-01")
-        val validationResult = DateRangeValidation.validate(fromDate, toDate)
+        val emptyString = ""
+        val specificError = MissingStartDateError
+
+        val validationResult = NonEmptyValidation.validate(emptyString, specificError)
         validationResult.isEmpty shouldBe false
         validationResult.length shouldBe 1
-        validationResult.head shouldBe InvalidRangeError
+        validationResult.head shouldBe specificError
 
       }
     }
