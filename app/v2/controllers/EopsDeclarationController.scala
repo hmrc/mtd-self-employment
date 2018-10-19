@@ -62,7 +62,7 @@ class EopsDeclarationController @Inject()(val authService: EnrolmentsAuthService
            | LateSubmissionError =>
         BadRequest(Json.toJson(errorResponse))
       case ConflictError
-           | NotFinalisedDeclaration
+           | v2.models.errors.SubmitEopsDeclarationErrors.NotFinalisedDeclaration
            | RuleClass4Over16
            | RuleClass4PensionAge
            | RuleMismatchStartDate

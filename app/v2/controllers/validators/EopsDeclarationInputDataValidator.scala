@@ -24,7 +24,7 @@ import v2.models.inbound.{EopsDeclaration, EopsDeclarationInputData}
 
 class EopsDeclarationInputDataValidator extends Validator[EopsDeclarationInputData] {
 
-  private val validationSet = List(levelOneValidations, levelTwoValidations)
+  private val validationSet = List(levelOneValidations, levelTwoValidations, levelThreeValidations)
 
   private def levelOneValidations: EopsDeclarationInputData => List[List[ValidationError]] = (data: EopsDeclarationInputData) => {
     List(
@@ -40,7 +40,12 @@ class EopsDeclarationInputDataValidator extends Validator[EopsDeclarationInputDa
     List(
       DateRangeValidation.validate(LocalDate.parse(data.from), LocalDate.parse(data.to)),
       JsonFormatValidation.validate[EopsDeclaration](data.body)
-      // TODO Validate that specific values are set within the JSON
+    )
+  }
+
+  private def levelThreeValidations: EopsDeclarationInputData => List[List[ValidationError]] = (data: EopsDeclarationInputData) => {
+    List(
+      EopsDeclarationRequestDataValidation.validate(data.body)
     )
   }
 

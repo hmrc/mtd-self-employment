@@ -31,3 +31,6 @@ object InvalidRangeError extends ValidationError("RANGE_INVALID", "The start dat
 
 // TODO See if this should be a JSON format or something error
 object NEWBadRequestError extends ValidationError("INVALID_REQUEST", "Invalid request")
+
+// TODO Check where this should live - EOPSDeclartion specific
+object NotFinalisedDeclaration extends ValidationError("RULE_NOT_FINALISED", "The statement cannot be accepted without a declaration that it is finalised.")

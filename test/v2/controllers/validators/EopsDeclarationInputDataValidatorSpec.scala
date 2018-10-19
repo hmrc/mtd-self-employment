@@ -73,6 +73,15 @@ class EopsDeclarationInputDataValidatorSpec extends UnitSpec {
         result.head shouldBe InvalidEndDateError
       }
 
+      "when the declaration has not been finalised" in new Test {
+        val invalidJson = AnyContentAsJson(Json.obj("finalised" -> false))
+        val inputData = EopsDeclarationInputData(validNino, validFromDate, validToDate, invalidJson)
+
+        val result = validator.validate(inputData)
+        result.isEmpty shouldBe false
+        result.head shouldBe NotFinalisedDeclaration
+      }
+
     }
 
     "return multiple errors" when {
@@ -99,12 +108,10 @@ class EopsDeclarationInputDataValidatorSpec extends UnitSpec {
 
     "should run level 2 validations" when {
       "when all level 1 validations pass" in new Test {
-        println("ECHO")
         val invalidValuesInJson = AnyContentAsJson(Json.obj("fin" -> 123))
         val inputData = EopsDeclarationInputData(validNino, validFromDate, validToDate, invalidValuesInJson)
 
         val result = validator.validate(inputData)
-        println(result)
         result.isEmpty shouldBe false
         result.head shouldBe NEWBadRequestError
       }
@@ -125,7 +132,25 @@ class EopsDeclarationInputDataValidatorSpec extends UnitSpec {
       }
     }
 
-    // TODO JSON errors - Format and Business validations
+    "short circuit and not run level 3 validations" when {
+      "when a level 2 error exists" in new Test {
+
+        // Level 1 error should be all valid
+        // Level 2 error exists
+        val invalidJson = AnyContentAsJson(Json.obj("someMadeUpField" -> false))
+
+        val inputData = EopsDeclarationInputData(validNino, validFromDate, validToDate, invalidJson)
+
+        val result = validator.validate(inputData)
+        result.size shouldBe 1
+
+        // Should only be a BadRequestError and the NotFinalisedDeclaration should not be generated
+        result.head shouldBe NEWBadRequestError
+
+
+      }
+    }
 
   }
+
 }

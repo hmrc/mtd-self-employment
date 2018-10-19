@@ -16,15 +16,19 @@
 
 package v2.controllers.validators.validations
 
-import java.time.LocalDate
-
-import v2.models.errors.{InvalidRangeError, ValidationError}
+import play.api.mvc.AnyContentAsJson
+import v2.models.errors.{NotFinalisedDeclaration, ValidationError}
 import v2.validations.NoValidationErrors
 
-object DateRangeValidation {
+object EopsDeclarationRequestDataValidation {
 
-  def validate(start: LocalDate, end: LocalDate): List[ValidationError] = {
-    if (end.isBefore(start)) List(InvalidRangeError) else NoValidationErrors
+  def validate(data: AnyContentAsJson): List[ValidationError] = {
+
+    (data.json \ "finalised").asOpt[Boolean] match {
+      case Some(trueValue) if trueValue => NoValidationErrors
+      case _ => List(NotFinalisedDeclaration)
+    }
+
   }
 
 }
