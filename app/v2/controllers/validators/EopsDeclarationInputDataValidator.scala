@@ -26,7 +26,7 @@ class EopsDeclarationInputDataValidator extends Validator[EopsDeclarationInputDa
 
   private val validationSet = List(levelOneValidations, levelTwoValidations, levelThreeValidations)
 
-  private def levelOneValidations: EopsDeclarationInputData => List[List[ValidationError]] = (data: EopsDeclarationInputData) => {
+  private def levelOneValidations: EopsDeclarationInputData => List[List[MtdError]] = (data: EopsDeclarationInputData) => {
     List(
       NinoValidation.validate(data.nino),
       NonEmptyValidation.validate(data.from, MissingStartDateError),
@@ -37,20 +37,20 @@ class EopsDeclarationInputDataValidator extends Validator[EopsDeclarationInputDa
     )
   }
 
-  private def levelTwoValidations: EopsDeclarationInputData => List[List[ValidationError]] = (data: EopsDeclarationInputData) => {
+  private def levelTwoValidations: EopsDeclarationInputData => List[List[MtdError]] = (data: EopsDeclarationInputData) => {
     List(
       DateRangeValidation.validate(LocalDate.parse(data.from), LocalDate.parse(data.to)),
       JsonFormatValidation.validate[EopsDeclaration](data.body)
     )
   }
 
-  private def levelThreeValidations: EopsDeclarationInputData => List[List[ValidationError]] = (data: EopsDeclarationInputData) => {
+  private def levelThreeValidations: EopsDeclarationInputData => List[List[MtdError]] = (data: EopsDeclarationInputData) => {
     List(
       EopsDeclarationRequestDataValidation.validate(data.body)
     )
   }
 
-  override def validate(data: EopsDeclarationInputData): List[ValidationError] = {
+  override def validate(data: EopsDeclarationInputData): List[MtdError] = {
     run(validationSet, data)
   }
 

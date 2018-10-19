@@ -23,12 +23,11 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.domain.Nino
 import v2.models.EopsDeclarationSubmission
-import v2.models.errors._
 import v2.models.errors.SubmitEopsDeclarationErrors._
+import v2.models.errors._
 import v2.services.{EnrolmentsAuthService, EopsDeclarationService, MtdIdLookupService}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 @Singleton
 class EopsDeclarationController @Inject()(val authService: EnrolmentsAuthService,
@@ -50,19 +49,19 @@ class EopsDeclarationController @Inject()(val authService: EnrolmentsAuthService
 
   }
 
-  private def processError(errorResponse: ErrorResponse) = {
+  private def processError(errorResponse: ErrorWrapper) = {
     errorResponse.error match {
-      case v2.models.errors.SubmitEopsDeclarationErrors.InvalidStartDateError
-           | v2.models.errors.SubmitEopsDeclarationErrors.InvalidEndDateError
-           | v2.models.errors.SubmitEopsDeclarationErrors.InvalidRangeError
+      case InvalidStartDateError
+           | InvalidEndDateError
+           | InvalidRangeError
            | BadRequestError
-           | InvalidNinoError
+           | NinoFormatError
            | EarlySubmissionError
-           | v2.models.errors.SubmitEopsDeclarationErrors.NinoFormatError
+           | NinoFormatError
            | LateSubmissionError =>
         BadRequest(Json.toJson(errorResponse))
       case ConflictError
-           | v2.models.errors.SubmitEopsDeclarationErrors.NotFinalisedDeclaration
+           | NotFinalisedDeclaration
            | RuleClass4Over16
            | RuleClass4PensionAge
            | RuleMismatchStartDate

@@ -18,6 +18,7 @@ package v2.controllers.validators.validations
 
 trait Validation {
 
-  def validate = {}
+  // TODO Check if this function / trait is used and
+   def validate = {}
 
 }

@@ -17,11 +17,8 @@
 package v2.controllers.validators
 
 import org.scalamock.scalatest.MockFactory
-import play.api.libs.json.Json
-import play.api.mvc.AnyContentAsJson
 import support.UnitSpec
-import v2.models.errors.{NEWBadRequestError, ValidationError}
-//import v2.models.errors._
+import v2.models.errors.MtdError
 import v2.models.inbound.InputData
 
 class ValidatorSpec extends UnitSpec with MockFactory {
@@ -38,7 +35,7 @@ class ValidatorSpec extends UnitSpec with MockFactory {
         val levelOneValidationOne = new MockFunctionObject("Level: 1    Validation 1")
         val levelOneValidationTwo = new MockFunctionObject("Level: 1    Validation 2")
 
-        def levelOneValidations: TestInputData => List[List[ValidationError]] = (data: TestInputData) => {
+        def levelOneValidations: TestInputData => List[List[MtdError]] = (data: TestInputData) => {
           List(
             levelOneValidationOne.validate(false, None),
             levelOneValidationTwo.validate(false, None)
@@ -61,9 +58,9 @@ class ValidatorSpec extends UnitSpec with MockFactory {
         // Set up the mock validations
         val levelOneValidationOne = new MockFunctionObject("Level: 1    Validation 1")
         val levelOneValidationTwo = new MockFunctionObject("Level: 1    Validation 2")
-        val mockError = ValidationError("MOCK", "SOME ERROR")
+        val mockError = MtdError("MOCK", "SOME ERROR")
 
-        def levelOneValidations: TestInputData => List[List[ValidationError]] = (data: TestInputData) => {
+        def levelOneValidations: TestInputData => List[List[MtdError]] = (data: TestInputData) => {
           List(
             levelOneValidationOne.validate(false, None),
             levelOneValidationTwo.validate(true, Some(mockError))
@@ -89,16 +86,16 @@ class ValidatorSpec extends UnitSpec with MockFactory {
         val levelOneValidationTwo = new MockFunctionObject("Level: 1    Validation 2")
         val levelTwoValidationOne = new MockFunctionObject("Level: 2    Validation 1")
         val levelTwoValidationTwo = new MockFunctionObject("Level: 2    Validation 2")
-        val mockError = ValidationError("MOCK", "SOME ERROR ON LEVEL 2")
+        val mockError = MtdError("MOCK", "SOME ERROR ON LEVEL 2")
 
-        def levelOneValidations: TestInputData => List[List[ValidationError]] = (data: TestInputData) => {
+        def levelOneValidations: TestInputData => List[List[MtdError]] = (data: TestInputData) => {
           List(
             levelOneValidationOne.validate(false, None),
             levelOneValidationTwo.validate(false, None)
           )
         }
 
-        def levelTwoValidations: TestInputData => List[List[ValidationError]] = (data: TestInputData) => {
+        def levelTwoValidations: TestInputData => List[List[MtdError]] = (data: TestInputData) => {
           List(
             levelTwoValidationOne.validate(false, None),
             levelTwoValidationTwo.validate(true, Some(mockError))
@@ -126,7 +123,7 @@ class ValidatorSpec extends UnitSpec with MockFactory {
 class MockFunctionObject(name: String) {
   var called = 0
 
-  def validate(shouldError: Boolean, errorToReturn: Option[ValidationError]): List[ValidationError] = {
+  def validate(shouldError: Boolean, errorToReturn: Option[MtdError]): List[MtdError] = {
     println(s"[CALL RECEIVED] - $name")
     called = called + 1
     if (shouldError) List(errorToReturn.get) else List()

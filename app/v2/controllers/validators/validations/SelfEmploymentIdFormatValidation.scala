@@ -16,14 +16,14 @@
 
 package v2.controllers.validators.validations
 
-import v2.models.errors.{SelfEmploymentIdError, ValidationError}
+import v2.models.errors.{MtdError, SelfEmploymentIdError}
 import v2.validations.NoValidationErrors
 
 object SelfEmploymentIdFormatValidation extends Validation {
 
   private val dateRegex = "^[A-Za-z0-9]{15}$"
 
-  def validate(selfEmploymentId: String): List[ValidationError] = {
+  def validate(selfEmploymentId: String): List[MtdError] = {
 
     if (selfEmploymentId.matches(dateRegex)) NoValidationErrors else List(SelfEmploymentIdError)
 

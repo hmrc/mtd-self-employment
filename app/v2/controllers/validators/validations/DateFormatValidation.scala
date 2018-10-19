@@ -16,14 +16,14 @@
 
 package v2.controllers.validators.validations
 
-import v2.models.errors.ValidationError
+import v2.models.errors.MtdError
 import v2.validations.NoValidationErrors
 
 object DateFormatValidation extends Validation {
 
   private val dateRegex = "([0-9]{4}\\-[0-9]{2}\\-[0-9]{2})"
 
-  def validate(date: String, dateError: ValidationError): List[ValidationError] = {
+  def validate(date: String, dateError: MtdError): List[MtdError] = {
 
     if (date.matches(dateRegex)) NoValidationErrors else List(dateError)
 

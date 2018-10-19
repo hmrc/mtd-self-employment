@@ -26,7 +26,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.mocks.services.{MockEnrolmentsAuthService, MockEopsDeclarationService, MockMtdIdLookupService}
 import v2.models.EopsDeclarationSubmission
-import v2.models.errors.SubmitEopsDeclarationErrors.{InvalidEndDateError, _}
+import v2.models.errors.SubmitEopsDeclarationErrors._
 import v2.models.errors._
 
 import scala.concurrent.Future
@@ -71,13 +71,13 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
     "return a 400 (BAD_REQUEST) with a single error" when {
 
       val badRequestErrors = List(
-        v2.models.errors.SubmitEopsDeclarationErrors.InvalidStartDateError,
-        v2.models.errors.SubmitEopsDeclarationErrors.InvalidEndDateError,
-        v2.models.errors.SubmitEopsDeclarationErrors.InvalidRangeError,
+        InvalidStartDateError,
+        InvalidEndDateError,
+        InvalidRangeError,
         BadRequestError,
-        InvalidNinoError,
+        NinoFormatError,
         EarlySubmissionError,
-        v2.models.errors.SubmitEopsDeclarationErrors.NinoFormatError,
+        NinoFormatError,
         LateSubmissionError
       )
 
@@ -90,9 +90,9 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
     "return a 400 (BAD_REQUEST) with multiple errors" when {
 
       "when a BadRequestError is generated" in new Test {
-        val badRequestErrorContainer = ErrorResponse(BadRequestError, Some(Seq(v2.models.errors.SubmitEopsDeclarationErrors.MissingStartDateError,
+        val badRequestErrorContainer = ErrorWrapper(BadRequestError, Some(Seq(MissingStartDateError,
           InvalidEndDateError,
-          v2.models.errors.SubmitEopsDeclarationErrors.NinoFormatError))
+          NinoFormatError))
         )
 
         val eopsDeclarationSubmission = EopsDeclarationSubmission(Nino(nino), selfEmploymentId, LocalDate.parse(from), LocalDate.parse(to))
@@ -131,7 +131,7 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
         val eopsDeclarationSubmission = EopsDeclarationSubmission(Nino(nino), selfEmploymentId, LocalDate.parse(from), LocalDate.parse(to))
 
         MockedEopsDeclarationService.submit(eopsDeclarationSubmission)
-          .returns(Future.successful(Some(ErrorResponse(error, None))))
+          .returns(Future.successful(Some(ErrorWrapper(error, None))))
 
         val result = target.submit(nino, selfEmploymentId, from, to)(FakeRequest())
         status(result) shouldBe FORBIDDEN
@@ -144,7 +144,7 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
     "return a 403 (FORBIDDEN) with multiple errors" when {
 
       "when multiple BVR errors are generated" in new Test {
-        val bvrErrorsContainer = ErrorResponse(BVRError, Some(Seq(
+        val bvrErrorsContainer = ErrorWrapper(BVRError, Some(Seq(
           RuleClass4Over16,
           RuleClass4PensionAge,
           RuleMismatchStartDate,
@@ -171,7 +171,7 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
         val eopsDeclarationSubmission = EopsDeclarationSubmission(Nino(nino), selfEmploymentId, LocalDate.parse(from), LocalDate.parse(to))
 
         MockedEopsDeclarationService.submit(eopsDeclarationSubmission)
-          .returns(Future.successful(Some(ErrorResponse(NotFoundError, None))))
+          .returns(Future.successful(Some(ErrorWrapper(NotFoundError, None))))
 
         val result = target.submit(nino, selfEmploymentId, from, to)(FakeRequest())
         status(result) shouldBe NOT_FOUND
@@ -186,7 +186,7 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
         val eopsDeclarationSubmission = EopsDeclarationSubmission(Nino(nino), selfEmploymentId, LocalDate.parse(from), LocalDate.parse(to))
 
         MockedEopsDeclarationService.submit(eopsDeclarationSubmission)
-          .returns(Future.successful(Some(ErrorResponse(DownstreamError, None))))
+          .returns(Future.successful(Some(ErrorWrapper(DownstreamError, None))))
 
         val result = target.submit(nino, selfEmploymentId, from, to)(FakeRequest())
         status(result) shouldBe INTERNAL_SERVER_ERROR
@@ -198,7 +198,7 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
   def eopsErrorStatusTester(error: v2.models.errors.Error, expectedStatus: Int): Unit = {
     s"when a ${error.code} error occurs" in new Test {
       val eopsDeclarationSubmission = EopsDeclarationSubmission(Nino(nino), selfEmploymentId, LocalDate.parse(from), LocalDate.parse(to))
-      MockedEopsDeclarationService.submit(eopsDeclarationSubmission).returns(Future.successful(Some(ErrorResponse(error, None))))
+      MockedEopsDeclarationService.submit(eopsDeclarationSubmission).returns(Future.successful(Some(ErrorWrapper(error, None))))
       val response: Future[Result] = target.submit(nino, selfEmploymentId, from, to)(FakeRequest())
       status(response) shouldBe expectedStatus
       contentAsJson(response) shouldBe Json.toJson(error)

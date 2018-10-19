@@ -16,9 +16,24 @@
 
 package v2.models.errors
 
-object InvalidNinoError extends Error("NINO_INVALID", "The provided NINO is invalid")
-object DownstreamError extends Error("INTERNAL_SERVER_ERROR", "An internal server error occurred")
-object NotFoundError extends Error("MATCHING_RESOURCE_NOT_FOUND", "Matching resource not found")
-object BadRequestError extends Error("INVALID_REQUEST", "Invalid request")
-object BVRError extends Error("BUSINESS_ERROR", "Business validation error")
-object ServiceUnavailableError extends Error("SERVICE_UNAVAILABLE", "Internal server error")
+import play.api.libs.json.{JsValue, Json, Writes}
+
+case class ErrorWrapper(error: MtdError, errors: Option[Seq[MtdError]])
+
+object ErrorWrapper {
+  implicit val writes: Writes[ErrorWrapper] = new Writes[ErrorWrapper] {
+    override def writes(errorResponse: ErrorWrapper): JsValue = {
+
+      val json = Json.obj(
+        "code" -> errorResponse.error.code,
+        "message" -> errorResponse.error.message
+      )
+
+      errorResponse.errors match {
+        case Some(errors) if errors.nonEmpty => json + ("errors" -> Json.toJson(errors))
+        case _ => json
+      }
+
+    }
+  }
+}

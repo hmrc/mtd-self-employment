@@ -16,24 +16,15 @@
 
 package v2.models.errors
 
-import play.api.libs.json.{JsValue, Json, Writes}
+import play.api.libs.functional.syntax._
+import play.api.libs.json._
 
-case class ErrorResponse(error: Error, errors: Option[Seq[Error]])
+case class MtdError(code: String, message: String)
 
-object ErrorResponse {
-  implicit val writes: Writes[ErrorResponse] = new Writes[ErrorResponse] {
-    override def writes(errorResponse: ErrorResponse): JsValue = {
-
-      val json = Json.obj(
-        "code" -> errorResponse.error.code,
-        "message" -> errorResponse.error.message
-      )
-
-      errorResponse.errors match {
-        case Some(errors) if errors.nonEmpty => json + ("errors" -> Json.toJson(errors))
-        case _ => json
-      }
-
-    }
-  }
+object MtdError {
+  implicit val writes: Writes[MtdError] = Json.writes[MtdError]
+  implicit val reads: Reads[MtdError] = (
+    (__ \ "code").read[String] and
+      (__ \ "reason").read[String]
+    ) (MtdError.apply _)
 }

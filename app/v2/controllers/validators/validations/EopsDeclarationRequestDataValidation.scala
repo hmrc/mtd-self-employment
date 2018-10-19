@@ -17,12 +17,12 @@
 package v2.controllers.validators.validations
 
 import play.api.mvc.AnyContentAsJson
-import v2.models.errors.{NotFinalisedDeclaration, ValidationError}
+import v2.models.errors.{MtdError, NotFinalisedDeclaration}
 import v2.validations.NoValidationErrors
 
 object EopsDeclarationRequestDataValidation {
 
-  def validate(data: AnyContentAsJson): List[ValidationError] = {
+  def validate(data: AnyContentAsJson): List[MtdError] = {
 
     (data.json \ "finalised").asOpt[Boolean] match {
       case Some(trueValue) if trueValue => NoValidationErrors

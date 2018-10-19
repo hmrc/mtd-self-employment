@@ -17,12 +17,12 @@
 package v2.controllers.validators.validations
 
 import uk.gov.hmrc.domain.Nino
-import v2.models.errors.{NinoFormatError, ValidationError}
+import v2.models.errors.{MtdError, NinoFormatError}
 import v2.validations.NoValidationErrors
 
 object NinoValidation {
 
-  def validate(nino: String): List[ValidationError] = {
+  def validate(nino: String): List[MtdError] = {
     if (!Nino.isValid(nino)) List(NinoFormatError) else NoValidationErrors
   }
 

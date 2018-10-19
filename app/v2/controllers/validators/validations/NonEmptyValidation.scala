@@ -16,12 +16,12 @@
 
 package v2.controllers.validators.validations
 
-import v2.models.errors.ValidationError
+import v2.models.errors.MtdError
 import v2.validations.NoValidationErrors
 
 object NonEmptyValidation {
 
-  def validate(str: String, specificError: ValidationError): List[ValidationError] = {
+  def validate(str: String, specificError: MtdError): List[MtdError] = {
 
     if (str.nonEmpty) NoValidationErrors else List(specificError)
 
