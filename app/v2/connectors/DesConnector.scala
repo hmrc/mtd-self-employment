@@ -17,14 +17,14 @@
 package v2.connectors
 
 import java.time.LocalDate
-
 import javax.inject.{Inject, Singleton}
+
 import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import v2.config.AppConfig
-import v2.models.errors.DesError
+import v2.models.outcomes.EopsDeclarationOutcome
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -39,11 +39,11 @@ class DesConnector @Inject()(http: HttpClient,
     .withExtraHeaders("Environment" -> appConfig.desEnv)
 
   def submitEOPSDeclaration(nino: String, from: LocalDate, to: LocalDate, selfEmploymentId: String)
-                           (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[DesError]] = {
+                           (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[EopsDeclarationOutcome] = {
     import v2.connectors.httpparsers.SubmitEOPSDeclarationHttpParser.submitEOPSDeclarationHttpReads
 
     val url = s"${appConfig.desBaseUrl}/income-tax/income-sources/nino/$nino/self-employment/$from/$to/declaration?incomeSourceId=$selfEmploymentId"
 
-    http.POSTEmpty[Option[DesError]](url)(submitEOPSDeclarationHttpReads, desHeaderCarrier, implicitly)
+    http.POSTEmpty[EopsDeclarationOutcome](url)(submitEOPSDeclarationHttpReads, desHeaderCarrier, implicitly)
   }
 }

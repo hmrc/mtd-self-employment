@@ -16,11 +16,12 @@
 
 package v2.models
 
-import v2.models.errors.MtdError
+import v2.models.errors.{DesError, MtdError}
 
 package object outcomes {
 
   type AuthOutcome = Either[MtdError, Boolean]
   type MtdIdLookupOutcome = Either[MtdError, String]
+  type EopsDeclarationOutcome = Either[DesError, String]
 
 }

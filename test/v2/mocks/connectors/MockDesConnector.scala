@@ -22,7 +22,7 @@ import org.scalamock.handlers.CallHandler
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.connectors.DesConnector
-import v2.models.errors.DesError
+import v2.models.outcomes.EopsDeclarationOutcome
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -31,7 +31,7 @@ class MockDesConnector extends MockFactory{
   val mockDesConnector = mock[DesConnector]
 
   object MockDesConnector {
-    def submitEOPSDeclaration(nino: String, from: LocalDate, to: LocalDate, selfEmploymentId: String): CallHandler[Future[Option[DesError]]] = {
+    def submitEOPSDeclaration(nino: String, from: LocalDate, to: LocalDate, selfEmploymentId: String): CallHandler[Future[EopsDeclarationOutcome]] = {
       (mockDesConnector.submitEOPSDeclaration(_: String, _: LocalDate, _: LocalDate, _: String)(_: HeaderCarrier, _: ExecutionContext))
         .expects(nino, from, to, selfEmploymentId, *, *)
     }

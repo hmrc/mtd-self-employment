@@ -26,9 +26,11 @@ class SubmitEopsDeclarationHttpParserSpec extends HttpParserSpec {
   "read" should {
     "return a None" when {
       "the http response contains a 204" in {
-        val httpResponse = HttpResponse(NO_CONTENT)
+        val correlationId = "x1234id"
+        val httpResponse = HttpResponse(NO_CONTENT, None, Map("CorrelationId" -> Seq(correlationId)))
+
         val result = submitEOPSDeclarationHttpReads.read(POST, "/test", httpResponse)
-        result shouldBe None
+        result shouldBe Right(correlationId)
       }
     }
 
@@ -45,7 +47,7 @@ class SubmitEopsDeclarationHttpParserSpec extends HttpParserSpec {
 
         val httpResponse = HttpResponse(BAD_REQUEST, Some(errorResponseJson))
         val result = submitEOPSDeclarationHttpReads.read(POST, "/test", httpResponse)
-        result shouldBe Some(expected)
+        result shouldBe Left(expected)
       }
 
       "the http response contains a 403 with an error response body" in {
@@ -60,7 +62,7 @@ class SubmitEopsDeclarationHttpParserSpec extends HttpParserSpec {
 
         val httpResponse = HttpResponse(FORBIDDEN, Some(errorResponseJson))
         val result = submitEOPSDeclarationHttpReads.read(POST, "/test", httpResponse)
-        result shouldBe Some(expected)
+        result shouldBe Left(expected)
       }
 
       "the http response contains a 409 with an error response body" in {
@@ -75,7 +77,7 @@ class SubmitEopsDeclarationHttpParserSpec extends HttpParserSpec {
 
         val httpResponse = HttpResponse(CONFLICT, Some(errorResponseJson))
         val result = submitEOPSDeclarationHttpReads.read(POST, "/test", httpResponse)
-        result shouldBe Some(expected)
+        result shouldBe Left(expected)
       }
     }
 
@@ -93,7 +95,7 @@ class SubmitEopsDeclarationHttpParserSpec extends HttpParserSpec {
 
         val httpResponse = HttpResponse(NOT_FOUND, Some(errorResponseJson))
         val result = submitEOPSDeclarationHttpReads.read(POST, "/test", httpResponse)
-        result shouldBe Some(expected)
+        result shouldBe Left(expected)
       }
 
       "the http response contains a 500 with an error response body" in {
@@ -109,7 +111,7 @@ class SubmitEopsDeclarationHttpParserSpec extends HttpParserSpec {
 
         val httpResponse = HttpResponse(INTERNAL_SERVER_ERROR, Some(errorResponseJson))
         val result = submitEOPSDeclarationHttpReads.read(POST, "/test", httpResponse)
-        result shouldBe Some(expected)
+        result shouldBe Left(expected)
       }
 
       "the http response contains a 503 with an error response body" in {
@@ -125,7 +127,7 @@ class SubmitEopsDeclarationHttpParserSpec extends HttpParserSpec {
 
         val httpResponse = HttpResponse(SERVICE_UNAVAILABLE, Some(errorResponseJson))
         val result = submitEOPSDeclarationHttpReads.read(POST, "/test", httpResponse)
-        result shouldBe Some(expected)
+        result shouldBe Left(expected)
       }
     }
 
@@ -150,7 +152,7 @@ class SubmitEopsDeclarationHttpParserSpec extends HttpParserSpec {
 
         val httpResponse = HttpResponse(BAD_REQUEST, Some(errorResponseJson))
         val result = submitEOPSDeclarationHttpReads.read(POST, "/test", httpResponse)
-        result shouldBe Some(expected)
+        result shouldBe Left(expected)
       }
     }
 
@@ -179,7 +181,7 @@ class SubmitEopsDeclarationHttpParserSpec extends HttpParserSpec {
 
         val httpResponse = HttpResponse(FORBIDDEN, Some(errorResponseJson))
         val result = submitEOPSDeclarationHttpReads.read(POST, "/test", httpResponse)
-        result shouldBe Some(expected)
+        result shouldBe Left(expected)
       }
     }
   }
