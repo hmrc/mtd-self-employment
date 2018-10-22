@@ -16,9 +16,4 @@
 
 package v2.controllers.requestParsers.validators.validations
 
-trait Validation {
-
-  // TODO Check if this function / trait is used and
-   def validate = {}
-
-}
+trait Validation
