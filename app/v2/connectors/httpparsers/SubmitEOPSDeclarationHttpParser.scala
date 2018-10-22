@@ -20,14 +20,15 @@ import play.api.Logger
 import play.api.http.Status._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import v2.models.errors.{GenericError, NotFoundError, ServiceUnavailableError, _}
+import v2.models.outcomes.EopsDeclarationOutcome
 
 object SubmitEOPSDeclarationHttpParser extends HttpParser {
 
   val logger = Logger(SubmitEOPSDeclarationHttpParser.getClass)
 
-  implicit val submitEOPSDeclarationHttpReads: HttpReads[Option[DesError]] =
-    new HttpReads[Option[DesError]] {
-      override def read(method: String, url: String, response: HttpResponse): Option[DesError] = {
+  implicit val submitEOPSDeclarationHttpReads: HttpReads[EopsDeclarationOutcome] =
+    new HttpReads[EopsDeclarationOutcome] {
+      override def read(method: String, url: String, response: HttpResponse): EopsDeclarationOutcome = {
 
         if(response.status != NO_CONTENT) {
           logger.info("[SubmitEOPSDeclarationHttpParser][read] - " +
@@ -36,11 +37,11 @@ object SubmitEOPSDeclarationHttpParser extends HttpParser {
         }
         response.status match {
 
-          case NO_CONTENT => None
-          case BAD_REQUEST | FORBIDDEN | CONFLICT => Some(parseErrors(response))
-          case NOT_FOUND => Some(GenericError(NotFoundError))
-          case SERVICE_UNAVAILABLE => Some(GenericError(ServiceUnavailableError))
-          case _ => Some(GenericError(DownstreamError))
+          case NO_CONTENT => Right(response.header("CorrelationId").getOrElse(""))
+          case BAD_REQUEST | FORBIDDEN | CONFLICT => Left(parseErrors(response))
+          case NOT_FOUND => Left(GenericError(NotFoundError))
+          case SERVICE_UNAVAILABLE => Left(GenericError(ServiceUnavailableError))
+          case _ => Left(GenericError(DownstreamError))
         }
       }
     }
