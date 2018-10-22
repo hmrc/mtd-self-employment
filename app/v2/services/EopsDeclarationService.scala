@@ -28,30 +28,30 @@ import scala.concurrent.{ExecutionContext, Future}
 class EopsDeclarationService @Inject()(connector: DesConnector){
 
   def submit(eopsDeclarationSubmission: EopsDeclarationSubmission)
-            (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[ErrorResponse]] = {
+            (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[ErrorWrapper]] = {
 
     connector.submitEOPSDeclaration(eopsDeclarationSubmission.nino.nino, eopsDeclarationSubmission.from,
       eopsDeclarationSubmission.to, eopsDeclarationSubmission.selfEmploymentId).map {
 
-      case Some(SingleError(error)) => Some(ErrorResponse(desErrorToMtdError(error.code), None))
-      case Some(MultipleErrors(errors)) => Some(ErrorResponse(BadRequestError, Some(errors.map(_.code).map(desErrorToMtdError))))
+      case Some(SingleError(error)) => Some(ErrorWrapper(desErrorToMtdError(error.code), None))
+      case Some(MultipleErrors(errors)) => Some(ErrorWrapper(BadRequestError, Some(errors.map(_.code).map(desErrorToMtdError))))
       case Some(BVRErrors(errors)) =>
         if(errors.size == 1){
-          Some(ErrorResponse(desBvrErrorToMtdError(errors.head.code), None))
+          Some(ErrorWrapper(desBvrErrorToMtdError(errors.head.code), None))
         }else {
-          Some(ErrorResponse(BVRError, Some(errors.map(_.code).map(desBvrErrorToMtdError))))
+          Some(ErrorWrapper(BVRError, Some(errors.map(_.code).map(desBvrErrorToMtdError))))
         }
-      case Some(GenericError(error)) => Some(ErrorResponse(error, None))
+      case Some(GenericError(error)) => Some(ErrorWrapper(error, None))
       case _ => None
     }
   }
 
-  private val desErrorToMtdError: Map[String, Error] = Map(
+  private val desErrorToMtdError: Map[String, MtdError] = Map(
     "NOT_FOUND" -> NotFoundError,
     "INVALID_IDTYPE" -> DownstreamError,
     "INVALID_IDVALUE" -> NinoFormatError,
-    "INVALID_ACCOUNTINGPERIODSTARTDATE" -> InvalidStartDateError,
-    "INVALID_ACCOUNTINGPERIODENDDATE" -> InvalidEndDateError,
+    "INVALID_ACCOUNTINGPERIODSTARTDATE" ->  InvalidStartDateError,
+    "INVALID_ACCOUNTINGPERIODENDDATE" ->  InvalidEndDateError,
     "CONFLICT" -> ConflictError,
     "EARLY_SUBMISSION" -> EarlySubmissionError,
     "LATE_SUBMISSION" -> LateSubmissionError,
@@ -60,7 +60,7 @@ class EopsDeclarationService @Inject()(connector: DesConnector){
     "INVALID_INCOMESOURCEID" -> NotFoundError
   )
 
-  private val desBvrErrorToMtdError: Map[String, Error] = Map(
+  private val desBvrErrorToMtdError: Map[String, MtdError] = Map(
     "C55008" -> RuleMismatchStartDate,
     "C55013" -> RuleMismatchEndDate,
     "C55014" -> RuleMismatchEndDate,

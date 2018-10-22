@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package v2.models.errors
+package v2
 
-sealed trait DesError
+package object validations {
 
-case class SingleError(error: MtdError) extends DesError
-case class MultipleErrors(errors: Seq[MtdError]) extends DesError
-case class BVRErrors(errors: Seq[MtdError]) extends DesError
-case class GenericError(error: MtdError) extends DesError
+  val NoValidationErrors = List()
+
+}

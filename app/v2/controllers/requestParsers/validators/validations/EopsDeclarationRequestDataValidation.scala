@@ -14,26 +14,21 @@
  * limitations under the License.
  */
 
-package v2.models.errors
+package v2.controllers.requestParsers.validators.validations
 
-import play.api.libs.json.{JsValue, Json, Writes}
+import play.api.mvc.AnyContentAsJson
+import v2.models.errors.{MtdError, NotFinalisedDeclaration}
+import v2.validations.NoValidationErrors
 
-case class ErrorResponse(error: Error, errors: Option[Seq[Error]])
+object EopsDeclarationRequestDataValidation {
 
-object ErrorResponse {
-  implicit val writes: Writes[ErrorResponse] = new Writes[ErrorResponse] {
-    override def writes(errorResponse: ErrorResponse): JsValue = {
+  def validate(data: AnyContentAsJson): List[MtdError] = {
 
-      val json = Json.obj(
-        "code" -> errorResponse.error.code,
-        "message" -> errorResponse.error.message
-      )
-
-      errorResponse.errors match {
-        case Some(errors) if errors.nonEmpty => json + ("errors" -> Json.toJson(errors))
-        case _ => json
-      }
-
+    (data.json \ "finalised").asOpt[Boolean] match {
+      case Some(trueValue) if trueValue => NoValidationErrors
+      case _ => List(NotFinalisedDeclaration)
     }
+
   }
+
 }

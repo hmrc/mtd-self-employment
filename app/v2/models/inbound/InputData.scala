@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-package v2.models.errors
+package v2.models.inbound
 
-object UnauthenticatedError extends Error("UNAUTHENTICATED", "Not authenticated")
-object UnauthorisedError extends Error("UNAUTHORIZED", "Bearer token is missing or not authorized")
+trait InputData

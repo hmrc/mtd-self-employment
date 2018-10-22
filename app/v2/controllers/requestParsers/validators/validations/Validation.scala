@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-package v2.models.errors
+package v2.controllers.requestParsers.validators.validations
 
-sealed trait DesError
-
-case class SingleError(error: MtdError) extends DesError
-case class MultipleErrors(errors: Seq[MtdError]) extends DesError
-case class BVRErrors(errors: Seq[MtdError]) extends DesError
-case class GenericError(error: MtdError) extends DesError
+trait Validation

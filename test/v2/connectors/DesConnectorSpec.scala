@@ -69,9 +69,9 @@ class DesConnectorSpec extends ConnectorSpec {
       }
     }
 
-    "return an ErrorResponse" when {
+    "return an ErrorWrapper" when {
       "the http client returns an error response" in new Test {
-        val errorResponse = SingleError(InvalidNinoError)
+        val errorResponse = SingleError(NinoFormatError)
 
         MockedHttpClient.postEmpty[Option[DesError]](url)
           .returns(Future.successful(Some(errorResponse)))

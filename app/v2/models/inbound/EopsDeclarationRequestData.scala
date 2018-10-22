@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package v2.models.errors
+package v2.models.inbound
 
-sealed trait DesError
+import play.api.mvc.AnyContentAsJson
 
-case class SingleError(error: MtdError) extends DesError
-case class MultipleErrors(errors: Seq[MtdError]) extends DesError
-case class BVRErrors(errors: Seq[MtdError]) extends DesError
-case class GenericError(error: MtdError) extends DesError
+case class EopsDeclarationRequestData(nino: String, selfEmploymentId: String, from: String, to: String, body: AnyContentAsJson) extends InputData
+

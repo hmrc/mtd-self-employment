@@ -45,7 +45,7 @@ class EopsDeclarationServiceSpec extends ServiceSpec {
         MockDesConnector.submitEOPSDeclaration(nino.nino, from, to, selfEmploymentId)
           .returns(Future.successful(None))
 
-        val result: Option[ErrorResponse] = await(service.submit(
+        val result: Option[ErrorWrapper] = await(service.submit(
           EopsDeclarationSubmission(nino, selfEmploymentId, from, to)))
 
         result shouldBe None
@@ -55,17 +55,17 @@ class EopsDeclarationServiceSpec extends ServiceSpec {
     "return multiple errors " when {
       "des connector returns sequence of errors" in new Test {
 
-        val desResponse = MultipleErrors(Seq(Error("INVALID_ACCOUNTINGPERIODENDDATE", "some reason"),
-          Error("INVALID_ACCOUNTINGPERIODSTARTDATE", "some reason")))
+        val desResponse = MultipleErrors(Seq(MtdError("INVALID_ACCOUNTINGPERIODENDDATE", "some reason"),
+          MtdError("INVALID_ACCOUNTINGPERIODSTARTDATE", "some reason")))
 
         MockDesConnector.submitEOPSDeclaration(nino.nino, from, to, selfEmploymentId)
           .returns(Future {
             Some(desResponse)
           })
 
-        val expected = ErrorResponse(BadRequestError, Some(Seq(InvalidEndDateError, InvalidStartDateError)))
+        val expected = ErrorWrapper(BadRequestError, Some(Seq(InvalidEndDateError, InvalidStartDateError)))
 
-        val result: Option[ErrorResponse] = await(service.submit(
+        val result: Option[ErrorWrapper] = await(service.submit(
           EopsDeclarationSubmission(nino, selfEmploymentId, from, to)))
 
 
@@ -76,17 +76,17 @@ class EopsDeclarationServiceSpec extends ServiceSpec {
     "return multiple bvr errors " when {
       "des connector returns sequence of bvr errors" in new Test {
 
-        val desResponse = BVRErrors(Seq(Error("C55317", "some reason"),
-          Error("C55318", "some reason")))
+        val desResponse = BVRErrors(Seq(MtdError("C55317", "some reason"),
+          MtdError("C55318", "some reason")))
 
         MockDesConnector.submitEOPSDeclaration(nino.nino, from, to, selfEmploymentId)
           .returns(Future {
             Some(desResponse)
           })
 
-        val expected = ErrorResponse(BVRError, Some(Seq(RuleClass4Over16, RuleClass4PensionAge)))
+        val expected = ErrorWrapper(BVRError, Some(Seq(RuleClass4Over16, RuleClass4PensionAge)))
 
-        val result: Option[ErrorResponse] = await(service.submit(
+        val result: Option[ErrorWrapper] = await(service.submit(
           EopsDeclarationSubmission(nino, selfEmploymentId, from, to)))
 
         result shouldBe Some(expected)
@@ -96,23 +96,23 @@ class EopsDeclarationServiceSpec extends ServiceSpec {
     "return single bvr error " when {
       "des connector returns single of bvr error" in new Test {
 
-        val desResponse = BVRErrors(Seq(Error("C55317", "some reason")))
+        val desResponse = BVRErrors(Seq(MtdError("C55317", "some reason")))
 
         MockDesConnector.submitEOPSDeclaration(nino.nino, from, to, selfEmploymentId)
           .returns(Future {
             Some(desResponse)
           })
 
-        val expected = ErrorResponse(RuleClass4Over16, None)
+        val expected = ErrorWrapper(RuleClass4Over16, None)
 
-        val result: Option[ErrorResponse] = await(service.submit(
+        val result: Option[ErrorWrapper] = await(service.submit(
           EopsDeclarationSubmission(nino, selfEmploymentId, from, to)))
 
         result shouldBe Some(expected)
       }
     }
 
-    val possibleDesErrors: Seq[(String, String, Error)] = Seq(
+    val possibleDesErrors: Seq[(String, String, MtdError)] = Seq(
       ("NOT_FOUND", "not found", NotFoundError),
       ("INVALID_IDTYPE", "downstream", DownstreamError),
       ("SERVICE_UNAVAILABLE", "service unavailable", ServiceUnavailableError),
@@ -130,15 +130,15 @@ class EopsDeclarationServiceSpec extends ServiceSpec {
         s"return a $description error" when {
           s"the DES connector returns a $desCode code" in new Test {
 
-            val error: Future[Option[DesError]] = Future.successful(Some(SingleError(Error(desCode, ""))))
+            val error: Future[Option[DesError]] = Future.successful(Some(SingleError(MtdError(desCode, ""))))
 
             MockDesConnector.submitEOPSDeclaration(nino.nino, from, to, selfEmploymentId)
               .returns(error)
 
-            val result: Option[ErrorResponse] = await(service.submit(
+            val result: Option[ErrorWrapper] = await(service.submit(
               EopsDeclarationSubmission(nino, selfEmploymentId, from, to)))
 
-            result shouldBe Some(ErrorResponse(mtdError, None))
+            result shouldBe Some(ErrorWrapper(mtdError, None))
           }
         }
     }

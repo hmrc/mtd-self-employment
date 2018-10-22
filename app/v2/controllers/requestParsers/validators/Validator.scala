@@ -14,19 +14,27 @@
  * limitations under the License.
  */
 
-package v2.models.errors
+package v2.controllers.requestParsers.validators
 
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
+import v2.models.errors.MtdError
+import v2.models.inbound.InputData
 
-trait MtdError
+trait Validator[A <: InputData] {
 
-case class Error(code: String, message: String) extends MtdError
 
-object Error {
-  implicit val writes: Writes[Error] = Json.writes[Error]
-  implicit val reads: Reads[Error] = (
-    (__ \ "code").read[String] and
-      (__ \ "reason").read[String]
-    ) (Error.apply _)
+  type ValidationLevel[T] = T => List[MtdError]
+
+  def validate(data: A): List[MtdError]
+
+  def run(validationSet: List[A => List[List[MtdError]]], data: A): List[MtdError] = {
+
+    validationSet match {
+      case Nil => List()
+      case thisLevel :: remainingLevels => thisLevel(data).flatten match {
+        case x if x.isEmpty => run(remainingLevels, data)
+        case x if x.nonEmpty => x
+      }
+    }
+  }
+
 }

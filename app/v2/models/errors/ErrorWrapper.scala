@@ -16,9 +16,24 @@
 
 package v2.models.errors
 
-sealed trait DesError
+import play.api.libs.json.{JsValue, Json, Writes}
 
-case class SingleError(error: MtdError) extends DesError
-case class MultipleErrors(errors: Seq[MtdError]) extends DesError
-case class BVRErrors(errors: Seq[MtdError]) extends DesError
-case class GenericError(error: MtdError) extends DesError
+case class ErrorWrapper(error: MtdError, errors: Option[Seq[MtdError]])
+
+object ErrorWrapper {
+  implicit val writes: Writes[ErrorWrapper] = new Writes[ErrorWrapper] {
+    override def writes(errorResponse: ErrorWrapper): JsValue = {
+
+      val json = Json.obj(
+        "code" -> errorResponse.error.code,
+        "message" -> errorResponse.error.message
+      )
+
+      errorResponse.errors match {
+        case Some(errors) if errors.nonEmpty => json + ("errors" -> Json.toJson(errors))
+        case _ => json
+      }
+
+    }
+  }
+}

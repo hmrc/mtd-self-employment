@@ -18,21 +18,25 @@ package v2.endpoints
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.http.Status
+import play.api.libs.json.Json
 import play.api.libs.ws.{WSRequest, WSResponse}
 import support.IntegrationBaseSpec
-import v2.stubs.{AuditStub, AuthStub, MtdIdLookupStub}
+import v2.stubs.{AuditStub, AuthStub, DesStub, MtdIdLookupStub}
 
-class SampleISpec extends IntegrationBaseSpec {
+class EopsDeclarationControllerISpec extends IntegrationBaseSpec {
 
   private trait Test {
 
     val nino: String
+    val from: String
+    val to: String
+    val selfEmploymentId: String
 
     def setupStubs(): StubMapping
 
     def request(): WSRequest = {
       setupStubs()
-      buildRequest(s"/2.0/sample/$nino")
+      buildRequest(s"/2.0/self-assessment/ni/$nino/self-employments/$selfEmploymentId/end-of-period-statements/from/$from/to/$to")
     }
   }
 
@@ -42,15 +46,22 @@ class SampleISpec extends IntegrationBaseSpec {
 
       "any valid request is made" in new Test {
         override val nino: String = "AA123456A"
+        override val selfEmploymentId: String = "X1AAAAAAAAAAAA5"
+        override val from: String = "2018-01-01"
+        override val to: String = "2018-12-31"
 
         override def setupStubs(): StubMapping = {
           AuditStub.audit()
           AuthStub.authorised()
           MtdIdLookupStub.ninoFound(nino)
+          DesStub.submissionSuccess(nino, selfEmploymentId, from, to)
         }
 
-        val response: WSResponse = await(request().get())
-        response.status shouldBe Status.OK
+        val submissionJson = Json.obj("finalised" -> true)
+
+        val response: WSResponse = await(request().post(submissionJson))
+        response.status shouldBe Status.NO_CONTENT
+
       }
     }
   }

@@ -18,24 +18,29 @@ package v2.endpoints
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.http.Status
+import play.api.libs.json.Json
 import play.api.libs.ws.{WSRequest, WSResponse}
 import support.IntegrationBaseSpec
-import v2.stubs.{AuditStub, AuthStub, MtdIdLookupStub}
+import v2.stubs.{AuditStub, AuthStub, DesStub, MtdIdLookupStub}
 
 class AuthISpec extends IntegrationBaseSpec {
 
   private trait Test {
-    val nino: String
+
+    val nino: String // = "AA123456A"
+    val selfEmploymentId: String = "X1AAAAAAAAAAAA5"
+    val from: String = "2018-01-01"
+    val to: String = "2018-12-31"
 
     def setupStubs(): StubMapping
 
     def request(): WSRequest = {
       setupStubs()
-      buildRequest(s"/2.0/sample/$nino")
+      buildRequest(s"/2.0/self-assessment/ni/$nino/self-employments/$selfEmploymentId/end-of-period-statements/from/$from/to/$to")
     }
   }
 
-  "Calling the sample endpoint" when {
+  "Calling the EOPS Declaration Submission endpoint" when {
 
     "the NINO cannot be converted to a MTD ID" should {
 
@@ -47,7 +52,7 @@ class AuthISpec extends IntegrationBaseSpec {
           MtdIdLookupStub.internalServerError(nino)
         }
 
-        val response: WSResponse = await(request().get())
+        val response: WSResponse = await(request().post(Json.obj("finalised" -> true)))
         response.status shouldBe Status.INTERNAL_SERVER_ERROR
       }
     }
@@ -61,10 +66,11 @@ class AuthISpec extends IntegrationBaseSpec {
           AuditStub.audit()
           MtdIdLookupStub.ninoFound(nino)
           AuthStub.authorised()
+          DesStub.submissionSuccess(nino, selfEmploymentId, from, to)
         }
 
-        val response: WSResponse = await(request().get())
-        response.status shouldBe Status.OK
+        val response: WSResponse = await(request().post(Json.obj("finalised" -> true)))
+        response.status shouldBe Status.NO_CONTENT
       }
     }
 
@@ -79,7 +85,7 @@ class AuthISpec extends IntegrationBaseSpec {
           AuthStub.unauthorisedNotLoggedIn()
         }
 
-        val response: WSResponse = await(request().get())
+        val response: WSResponse = await(request().post(Json.obj("finalised" -> true)))
         response.status shouldBe Status.UNAUTHORIZED
       }
     }
@@ -95,7 +101,7 @@ class AuthISpec extends IntegrationBaseSpec {
           AuthStub.unauthorisedOther()
         }
 
-        val response: WSResponse = await(request().get())
+        val response: WSResponse = await(request().post(Json.obj("finalised" -> true)))
         response.status shouldBe Status.FORBIDDEN
       }
     }

@@ -14,25 +14,16 @@
  * limitations under the License.
  */
 
-package v2.services
+package v2.controllers.requestParsers.validators.validations
 
-import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.HeaderCarrier
-import v2.connectors.MtdIdLookupConnector
-import v2.models.errors.NinoFormatError
-import v2.models.outcomes.MtdIdLookupOutcome
+import v2.models.errors.{MtdError, NinoFormatError}
+import v2.validations.NoValidationErrors
 
-import scala.concurrent.{ExecutionContext, Future}
+object NinoValidation {
 
-@Singleton
-class MtdIdLookupService @Inject()(val connector: MtdIdLookupConnector) {
-
-  def lookup(nino: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[MtdIdLookupOutcome] = {
-    if (Nino.isValid(nino)) {
-      connector.getMtdId(nino)
-    } else {
-      Future.successful(Left(NinoFormatError))
-    }
+  def validate(nino: String): List[MtdError] = {
+    if (!Nino.isValid(nino)) List(NinoFormatError) else NoValidationErrors
   }
+
 }
