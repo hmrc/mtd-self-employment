@@ -27,9 +27,6 @@ object InvalidEndDateError extends MtdError("FORMAT_END_DATE", "Invalid account 
 object InvalidRangeError extends MtdError("RANGE_INVALID", "The start date must be the same day or before the from date")
 
 
-// TODO See if this should be a JSON format or something error
-object NEWBadRequestError extends MtdError("INVALID_REQUEST", "Invalid request")
-
 // TODO Check where this should live - EOPSDeclaration specific
 object NotFinalisedDeclaration extends
   MtdError("RULE_NOT_FINALISED", "The statement cannot be accepted without a declaration that it is finalised.")

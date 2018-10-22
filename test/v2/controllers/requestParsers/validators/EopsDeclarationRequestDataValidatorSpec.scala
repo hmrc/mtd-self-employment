@@ -123,7 +123,7 @@ class EopsDeclarationRequestDataValidatorSpec extends UnitSpec {
 
         val result = validator.validate(inputData)
         result.isEmpty shouldBe false
-        result.head shouldBe NEWBadRequestError
+        result.head shouldBe BadRequestError
       }
     }
 
@@ -155,7 +155,7 @@ class EopsDeclarationRequestDataValidatorSpec extends UnitSpec {
         result.size shouldBe 1
 
         // Should only be a BadRequestError and the NotFinalisedDeclaration should not be generated
-        result.head shouldBe NEWBadRequestError
+        result.head shouldBe BadRequestError
 
 
       }

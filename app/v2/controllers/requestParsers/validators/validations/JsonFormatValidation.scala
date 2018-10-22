@@ -18,7 +18,7 @@ package v2.controllers.requestParsers.validators.validations
 
 import play.api.libs.json._
 import play.api.mvc.AnyContentAsJson
-import v2.models.errors.{MtdError, NEWBadRequestError}
+import v2.models.errors.{BadRequestError, MtdError}
 import v2.validations.NoValidationErrors
 
 object JsonFormatValidation {
@@ -27,7 +27,7 @@ object JsonFormatValidation {
 
     data.json.validate[A] match {
       case JsSuccess(_, _) => NoValidationErrors
-      case _ => List(NEWBadRequestError)
+      case _ => List(BadRequestError)
     }
 
   }
