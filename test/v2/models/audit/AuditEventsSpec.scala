@@ -32,12 +32,12 @@ class AuditEventsSpec extends UnitSpec {
   "audit event" should {
     "return valid AuditEvent" when {
       "proper data is supplied" in {
-        val auditEvent = AuditEvent[TestDetails](auditType = "MTD-PROPERTY-TEST",
-          transactionName = "mtd-property-audit",
+        val auditEvent = AuditEvent[TestDetails](auditType = "MTD-SELF-EMPLOYMENT-TEST",
+          transactionName = "mtd-self-employment-audit",
           detail = TestDetails(nino, LocalDate.parse(from), "5b85344c1100008e00c6a181"))
 
-        assert(auditEvent.transactionName == "mtd-property-audit")
-        assert(auditEvent.auditType == "MTD-PROPERTY-TEST")
+        assert(auditEvent.transactionName == "mtd-self-employment-audit")
+        assert(auditEvent.auditType == "MTD-SELF-EMPLOYMENT-TEST")
         assert(auditEvent.detail.isInstanceOf[TestDetails])
       }
     }
