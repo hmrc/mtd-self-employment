@@ -114,20 +114,6 @@ class AuthorisedControllerSpec extends ControllerBaseSpec {
     }
   }
 
-  "the MTD user is not authenticated" should {
-    "return a 401" in new Test {
-
-      MockedMtdIdLookupService.lookup(nino)
-        .returns(Future.successful(Right(mtdId)))
-
-      MockedEnrolmentsAuthService.authorised(predicate)
-        .returns(Future.successful(Left(UnauthenticatedError)))
-
-      private val result = target.action(nino)(fakeGetRequest)
-      status(result) shouldBe UNAUTHORIZED
-    }
-  }
-
   "the MTD user is not authorised" should {
     "return a 403" in new Test {
 
