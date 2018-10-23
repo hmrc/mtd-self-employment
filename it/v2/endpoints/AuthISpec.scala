@@ -86,7 +86,7 @@ class AuthISpec extends IntegrationBaseSpec {
         }
 
         val response: WSResponse = await(request().post(Json.obj("finalised" -> true)))
-        response.status shouldBe Status.UNAUTHORIZED
+        response.status shouldBe Status.FORBIDDEN
       }
     }
 
