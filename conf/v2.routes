@@ -1,1 +1,1 @@
-POST        /self-assessment/ni/:nino/self-employments/:selfEmploymentId/end-of-period-statements/from/:from/to/:to        v2.controllers.EopsDeclarationController.submit(nino: String, selfEmploymentId: String, from: String, to: String)
+POST        /ni/:nino/self-employments/:selfEmploymentId/end-of-period-statements/from/:from/to/:to        v2.controllers.EopsDeclarationController.submit(nino: String, selfEmploymentId: String, from: String, to: String)
