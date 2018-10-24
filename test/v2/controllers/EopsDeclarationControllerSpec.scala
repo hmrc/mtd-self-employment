@@ -98,9 +98,7 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
         InvalidEndDateError,
         InvalidRangeError,
         BadRequestError,
-        NinoFormatError,
-        EarlySubmissionError,
-        LateSubmissionError
+        NinoFormatError
       )
 
       for (error <- badRequestErrors) {
@@ -144,7 +142,9 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
         RuleMismatchStartDate,
         RuleMismatchEndDate,
         RuleConsolidatedExpenses,
-        BVRError
+        BVRError,
+        EarlySubmissionError,
+        LateSubmissionError
       )
 
       for (error <- forbiddenErrors) {

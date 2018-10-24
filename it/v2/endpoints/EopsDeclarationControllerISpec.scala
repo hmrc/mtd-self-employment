@@ -36,7 +36,7 @@ class EopsDeclarationControllerISpec extends IntegrationBaseSpec {
 
     def request(): WSRequest = {
       setupStubs()
-      buildRequest(s"/2.0/self-assessment/ni/$nino/self-employments/$selfEmploymentId/end-of-period-statements/from/$from/to/$to")
+      buildRequest(s"/2.0/ni/$nino/self-employments/$selfEmploymentId/end-of-period-statements/from/$from/to/$to")
     }
   }
 

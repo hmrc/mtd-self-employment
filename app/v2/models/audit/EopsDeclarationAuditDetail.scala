@@ -20,12 +20,14 @@ import play.api.libs.json._
 
 case class EopsDeclarationAuditDetail(
                                        userType: String,
-                                       agentReferenceNumber: Option[String],
+                                       agentReferenceNumber: Option[String] = None,
                                        nino: String,
                                        from: String,
                                        to: String,
                                        finalised: Boolean,
-                                       `X-CorrelationId`: String
+                                       `X-CorrelationId`: String,
+                                       incomeSourceId: String,
+                                       businessId: Option[String] = None
                                      )
 
 object EopsDeclarationAuditDetail {

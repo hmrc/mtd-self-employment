@@ -27,7 +27,7 @@ class EopsDeclarationAuditDetailSpec extends UnitSpec with JsonErrorValidators {
   val to: String = "2018-06-04"
 
   val eopsDeclarationAuditDetail =
-    EopsDeclarationAuditDetail("Agent", Some("123456780"), nino, from, to, true, "5b85344c1100008e00c6a181")
+    EopsDeclarationAuditDetail("Agent", Some("123456780"), nino, from, to, true, "5b85344c1100008e00c6a181", "XAIS12345678987", None)
 
   val eopsDeclarationAuditDetailAgentJson =
     """
@@ -38,7 +38,8 @@ class EopsDeclarationAuditDetailSpec extends UnitSpec with JsonErrorValidators {
       | "from": "2017-06-04",
       | "to": "2018-06-04",
       | "finalised": true,
-      | "X-CorrelationId": "5b85344c1100008e00c6a181"
+      | "X-CorrelationId": "5b85344c1100008e00c6a181",
+      | "incomeSourceId": "XAIS12345678987"
       |}
     """.stripMargin
 
@@ -50,7 +51,8 @@ class EopsDeclarationAuditDetailSpec extends UnitSpec with JsonErrorValidators {
       | "from": "2017-06-04",
       | "to": "2018-06-04",
       | "finalised": true,
-      | "X-CorrelationId": "5b85344c1100008e00c6a181"
+      | "X-CorrelationId": "5b85344c1100008e00c6a181",
+      | "incomeSourceId": "XAIS12345678987"
       |}
     """.stripMargin
 
