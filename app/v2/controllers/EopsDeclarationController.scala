@@ -54,12 +54,11 @@ class EopsDeclarationController @Inject()(val authService: EnrolmentsAuthService
            | InvalidEndDateError
            | InvalidRangeError
            | BadRequestError
-           | NinoFormatError
-           | EarlySubmissionError
-           | NinoFormatError
-           | LateSubmissionError =>
+           | NinoFormatError =>
         BadRequest(Json.toJson(errorResponse))
       case ConflictError
+           | EarlySubmissionError
+           | LateSubmissionError
            | NotFinalisedDeclaration
            | RuleClass4Over16
            | RuleClass4PensionAge
