@@ -26,7 +26,7 @@ class SelfEmploymentIdFormatValidationSpec extends UnitSpec with JsonErrorValida
     "return no errors" when {
 
       "when a self employment id with a valid format is supplied" in {
-        val validSelfEmploymentId = "X1AAAAAAAAAAAA5"
+        val validSelfEmploymentId = "X1IS12345678901"
 
         val validationResult = SelfEmploymentIdFormatValidation.validate(validSelfEmploymentId)
         validationResult.isEmpty shouldBe true

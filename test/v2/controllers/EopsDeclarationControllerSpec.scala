@@ -98,7 +98,8 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
         InvalidEndDateError,
         InvalidRangeError,
         BadRequestError,
-        NinoFormatError
+        NinoFormatError,
+        SelfEmploymentIdError
       )
 
       for (error <- badRequestErrors) {
