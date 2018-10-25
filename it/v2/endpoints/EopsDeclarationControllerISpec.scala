@@ -46,7 +46,7 @@ class EopsDeclarationControllerISpec extends IntegrationBaseSpec {
 
       "any valid request is made" in new Test {
         override val nino: String = "AA123456A"
-        override val selfEmploymentId: String = "X1AAAAAAAAAAAA5"
+        override val selfEmploymentId: String = "X1IS12345678901"
         override val from: String = "2018-01-01"
         override val to: String = "2018-12-31"
 
