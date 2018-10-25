@@ -26,7 +26,7 @@ import v2.models.outcomes.EopsDeclarationOutcome
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class MockDesConnector extends MockFactory{
+trait MockDesConnector extends MockFactory{
 
   val mockDesConnector = mock[DesConnector]
 

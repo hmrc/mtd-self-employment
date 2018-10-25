@@ -18,17 +18,14 @@ package v2.models.audit
 
 import play.api.libs.json._
 
-case class EopsDeclarationAuditDetail(
-                                       userType: String,
-                                       agentReferenceNumber: Option[String] = None,
-                                       nino: String,
-                                       from: String,
-                                       to: String,
-                                       finalised: Boolean,
-                                       `X-CorrelationId`: String,
-                                       incomeSourceId: String,
-                                       businessId: Option[String] = None
-                                     )
+case class EopsDeclarationAuditDetail(userType: String,
+                                      agentReferenceNumber: Option[String] = None,
+                                      nino: String,
+                                      from: String,
+                                      to: String,
+                                      finalised: Boolean,
+                                      `X-CorrelationId`: String,
+                                      incomeSourceId: String)
 
 object EopsDeclarationAuditDetail {
   implicit val write: OWrites[EopsDeclarationAuditDetail] = Json.writes[EopsDeclarationAuditDetail]

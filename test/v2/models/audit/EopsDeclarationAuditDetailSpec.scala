@@ -27,7 +27,7 @@ class EopsDeclarationAuditDetailSpec extends UnitSpec with JsonErrorValidators {
   val to: String = "2018-06-04"
 
   val eopsDeclarationAuditDetail =
-    EopsDeclarationAuditDetail("Agent", Some("123456780"), nino, from, to, true, "5b85344c1100008e00c6a181", "XAIS12345678987", None)
+    EopsDeclarationAuditDetail("Agent", Some("123456780"), nino, from, to, true, "5b85344c1100008e00c6a181", "XAIS12345678987")
 
   val eopsDeclarationAuditDetailAgentJson =
     """
