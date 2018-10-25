@@ -28,7 +28,7 @@ class AuthISpec extends IntegrationBaseSpec {
   private trait Test {
 
     val nino: String // = "AA123456A"
-    val selfEmploymentId: String = "X1AAAAAAAAAAAA5"
+    val selfEmploymentId: String = "X1IS12345678901"
     val from: String = "2018-01-01"
     val to: String = "2018-12-31"
 
