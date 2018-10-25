@@ -18,23 +18,26 @@ package v2.mocks.services
 
 import org.scalamock.handlers.CallHandler
 import org.scalamock.scalatest.MockFactory
+import play.api.libs.json.Writes
 import uk.gov.hmrc.http.HeaderCarrier
-import v2.models.EopsDeclarationSubmission
-import v2.models.auth.UserDetails
-import v2.models.errors.ErrorWrapper
-import v2.services.EopsDeclarationService
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
+import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
+import v2.models.audit.AuditEvent
+import v2.services.AuditService
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait MockEopsDeclarationService extends MockFactory {
+trait MockAuditService extends MockFactory {
 
-  val mockEopsDeclarationService: EopsDeclarationService = mock[EopsDeclarationService]
+  val mockAuditService: AuditService = mock[AuditService]
 
-  object MockedEopsDeclarationService {
-    def submit(eopsDeclarationSubmission: EopsDeclarationSubmission): CallHandler[Future[Option[ErrorWrapper]]] = {
-      (mockEopsDeclarationService.submit(_: EopsDeclarationSubmission)
-      (_: HeaderCarrier, _: ExecutionContext, _: UserDetails))
-        .expects(eopsDeclarationSubmission, *, *, *)
+  object MockedAuditService {
+    def auditEventSucceeds[T](event: AuditEvent[T])(implicit ec: ExecutionContext): CallHandler[Future[AuditResult]] = {
+      (mockAuditService.auditEvent(_: AuditEvent[T])(_: HeaderCarrier, _: ExecutionContext, _: Writes[T]))
+        .expects(*, *, *, *)
+        .returns(Future {
+          Success
+        })
     }
   }
 

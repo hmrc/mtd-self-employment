@@ -21,6 +21,7 @@ import java.time.LocalDate
 import uk.gov.hmrc.domain.Nino
 import v2.mocks.connectors.MockDesConnector
 import v2.models.EopsDeclarationSubmission
+import v2.models.auth.UserDetails
 import v2.models.errors.SubmitEopsDeclarationErrors._
 import v2.models.errors._
 import v2.models.outcomes.EopsDeclarationOutcome
@@ -29,9 +30,10 @@ import scala.concurrent.Future
 
 class EopsDeclarationServiceSpec extends ServiceSpec {
 
+  implicit val userDetails: UserDetails = UserDetails("1234567890", "Individual", None)
   val nino = Nino("AA123567A")
-  val from = LocalDate.parse("2017-01-01")
-  val to = LocalDate.parse("2018-01-01")
+  val from: LocalDate = LocalDate.parse("2017-01-01")
+  val to: LocalDate = LocalDate.parse("2018-01-01")
   val selfEmploymentId = "test-se-id"
   val correlationId = "x1234id"
 

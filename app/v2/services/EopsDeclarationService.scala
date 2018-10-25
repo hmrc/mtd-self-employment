@@ -21,6 +21,7 @@ import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.connectors.DesConnector
 import v2.models.EopsDeclarationSubmission
+import v2.models.auth.UserDetails
 import v2.models.errors.SubmitEopsDeclarationErrors._
 import v2.models.errors._
 
@@ -31,7 +32,9 @@ class EopsDeclarationService @Inject()(connector: DesConnector){
   val logger: Logger = Logger(this.getClass)
 
   def submit(eopsDeclarationSubmission: EopsDeclarationSubmission)
-            (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[ErrorWrapper]] = {
+            (implicit hc: HeaderCarrier,
+             ec: ExecutionContext,
+             userDetails: UserDetails): Future[Option[ErrorWrapper]] = {
 
     connector.submitEOPSDeclaration(eopsDeclarationSubmission.nino.nino, eopsDeclarationSubmission.from,
       eopsDeclarationSubmission.to, eopsDeclarationSubmission.selfEmploymentId).map {
