@@ -25,7 +25,7 @@ import v2.models.inbound.EopsDeclarationRequestData
 class EopsDeclarationRequestDataValidatorSpec extends UnitSpec {
 
   val validNino = "AA123456A"
-  val validSelfEmploymentId = "X1AAAAAAAAAAAA5"
+  val validSelfEmploymentId = "X1IS12345678901"
   val validFromDate = "2018-01-01"
   val validToDate = "2018-12-31"
   val validJsonBody = AnyContentAsJson(Json.obj("finalised" -> true))

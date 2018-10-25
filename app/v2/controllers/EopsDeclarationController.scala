@@ -44,7 +44,9 @@ class EopsDeclarationController @Inject()(val authService: EnrolmentsAuthService
             case None => NoContent
             case Some(errorResponse) => processError(errorResponse)
           }
-        case Left(validationErrorResponse) => Future { processError(validationErrorResponse) }
+        case Left(validationErrorResponse) => Future {
+          processError(validationErrorResponse)
+        }
       }
     }
 
@@ -54,7 +56,8 @@ class EopsDeclarationController @Inject()(val authService: EnrolmentsAuthService
            | InvalidEndDateError
            | InvalidRangeError
            | BadRequestError
-           | NinoFormatError =>
+           | NinoFormatError
+           | SelfEmploymentIdError =>
         BadRequest(Json.toJson(errorResponse))
       case ConflictError
            | EarlySubmissionError

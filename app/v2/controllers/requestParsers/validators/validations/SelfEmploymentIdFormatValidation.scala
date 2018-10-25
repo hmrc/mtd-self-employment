@@ -21,11 +21,11 @@ import v2.validations.NoValidationErrors
 
 object SelfEmploymentIdFormatValidation extends Validation {
 
-  private val dateRegex = "^[A-Za-z0-9]{15}$"
+  private val incomeSourceIdRegex = "^X[A-Z0-9]{1}IS[0-9]{11}$"
 
   def validate(selfEmploymentId: String): List[MtdError] = {
 
-    if (selfEmploymentId.matches(dateRegex)) NoValidationErrors else List(SelfEmploymentIdError)
+    if (selfEmploymentId.matches(incomeSourceIdRegex)) NoValidationErrors else List(SelfEmploymentIdError)
 
   }
 
