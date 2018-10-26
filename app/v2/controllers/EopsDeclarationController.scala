@@ -38,6 +38,7 @@ class EopsDeclarationController @Inject()(val authService: EnrolmentsAuthService
   def submit(nino: String, selfEmploymentId: String, from: String, to: String): Action[JsValue] =
     authorisedAction(nino).async(parse.json) { implicit request =>
 
+      implicit val userDetails = request.userDetails
       requestDataParser.parseRequest(EopsDeclarationRequestData(nino, selfEmploymentId, from, to, AnyContentAsJson(request.body))) match {
         case Right(eopsDeclarationSubmission) =>
           eopsDeclarationService.submit(eopsDeclarationSubmission).map {

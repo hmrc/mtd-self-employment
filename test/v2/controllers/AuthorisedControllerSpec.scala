@@ -93,7 +93,7 @@ class AuthorisedControllerSpec extends ControllerBaseSpec {
   }
 
   "authorisation checks fail when retrieving the MDT ID" should {
-    "return a 403" in new Test {
+    "return a 401" in new Test {
 
       MockedMtdIdLookupService.lookup(nino)
         .returns(Future.successful(Left(UnauthorisedError)))
@@ -114,8 +114,22 @@ class AuthorisedControllerSpec extends ControllerBaseSpec {
     }
   }
 
+  "the MTD user is not authenticated" should {
+    "return a 401" in new Test {
+
+      MockedMtdIdLookupService.lookup(nino)
+        .returns(Future.successful(Right(mtdId)))
+
+      MockedEnrolmentsAuthService.authorised(predicate)
+        .returns(Future.successful(Left(UnauthorisedError)))
+
+      private val result = target.action(nino)(fakeGetRequest)
+      status(result) shouldBe FORBIDDEN
+    }
+  }
+
   "the MTD user is not authorised" should {
-    "return a 403" in new Test {
+    "return a 401" in new Test {
 
       MockedMtdIdLookupService.lookup(nino)
         .returns(Future.successful(Right(mtdId)))

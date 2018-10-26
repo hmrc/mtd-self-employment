@@ -19,23 +19,27 @@ package v2.services
 import com.google.inject.Inject
 import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import v2.connectors.DesConnector
 import v2.models.EopsDeclarationSubmission
+import v2.models.audit.{AuditEvent, EopsDeclarationAuditDetail}
+import v2.models.auth.UserDetails
 import v2.models.errors.SubmitEopsDeclarationErrors._
 import v2.models.errors._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class EopsDeclarationService @Inject()(connector: DesConnector){
+class EopsDeclarationService @Inject()(auditService: AuditService, connector: DesConnector) {
 
   val logger: Logger = Logger(this.getClass)
 
-  def submit(eopsDeclarationSubmission: EopsDeclarationSubmission)
-            (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[ErrorWrapper]] = {
+  def submit(submission: EopsDeclarationSubmission)
+            (implicit hc: HeaderCarrier,
+             ec: ExecutionContext,
+             userDetails: UserDetails): Future[Option[ErrorWrapper]] = {
 
-    connector.submitEOPSDeclaration(eopsDeclarationSubmission.nino.nino, eopsDeclarationSubmission.from,
-      eopsDeclarationSubmission.to, eopsDeclarationSubmission.selfEmploymentId).map {
-
+    connector.submitEOPSDeclaration(submission.nino.nino, submission.from,
+      submission.to, submission.selfEmploymentId).map {
       case Left(SingleError(error)) => Some(ErrorWrapper(desErrorToMtdError(error.code), None))
       case Left(MultipleErrors(errors)) =>
         val mtdErrors = errors.map(error => desErrorToMtdError(error.code))
@@ -47,25 +51,44 @@ class EopsDeclarationService @Inject()(connector: DesConnector){
           Some(ErrorWrapper(BadRequestError, Some(mtdErrors)))
         }
       case Left(BVRErrors(errors)) =>
-        if(errors.size == 1){
+        if (errors.size == 1) {
           Some(ErrorWrapper(desBvrErrorToMtdError(errors.head.code), None))
-        }else {
+        } else {
           Some(ErrorWrapper(BVRError, Some(errors.map(_.code).map(desBvrErrorToMtdError))))
         }
       case Left(GenericError(error)) => Some(ErrorWrapper(error, None))
       case Right(correlationId) =>
-        //audit
-        // @TODO Audit implementation
+        auditSuccessfulSubmission(submission, correlationId)
         None
     }
+  }
+
+  private def auditSuccessfulSubmission(submission: EopsDeclarationSubmission,
+                                        correlationId: String)
+                                       (implicit ec: ExecutionContext,
+                                        userDetails: UserDetails): Future[AuditResult] = {
+    val details = EopsDeclarationAuditDetail(
+      userDetails.userType,
+      userDetails.agentReferenceNumber,
+      submission.nino.nino,
+      submission.from.toString,
+      submission.to.toString,
+      finalised = true,
+      correlationId,
+      submission.selfEmploymentId
+    )
+
+    val event = AuditEvent("submitEndOfPeriodStatement", "uk-properties-submit-eops", details)
+
+    auditService.auditEvent(event)
   }
 
   private val desErrorToMtdError: Map[String, MtdError] = Map(
     "NOT_FOUND" -> NotFoundError,
     "INVALID_IDTYPE" -> DownstreamError,
     "INVALID_IDVALUE" -> NinoFormatError,
-    "INVALID_ACCOUNTINGPERIODSTARTDATE" ->  InvalidStartDateError,
-    "INVALID_ACCOUNTINGPERIODENDDATE" ->  InvalidEndDateError,
+    "INVALID_ACCOUNTINGPERIODSTARTDATE" -> InvalidStartDateError,
+    "INVALID_ACCOUNTINGPERIODENDDATE" -> InvalidEndDateError,
     "CONFLICT" -> ConflictError,
     "EARLY_SUBMISSION" -> EarlySubmissionError,
     "LATE_SUBMISSION" -> LateSubmissionError,

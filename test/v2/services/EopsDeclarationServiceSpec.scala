@@ -20,7 +20,10 @@ import java.time.LocalDate
 
 import uk.gov.hmrc.domain.Nino
 import v2.mocks.connectors.MockDesConnector
+import v2.mocks.services.MockAuditService
 import v2.models.EopsDeclarationSubmission
+import v2.models.audit.AuditEvent
+import v2.models.auth.UserDetails
 import v2.models.errors.SubmitEopsDeclarationErrors._
 import v2.models.errors._
 import v2.models.outcomes.EopsDeclarationOutcome
@@ -29,14 +32,16 @@ import scala.concurrent.Future
 
 class EopsDeclarationServiceSpec extends ServiceSpec {
 
-  val nino = Nino("AA123567A")
-  val from = LocalDate.parse("2017-01-01")
-  val to = LocalDate.parse("2018-01-01")
-  val selfEmploymentId = "test-se-id"
-  val correlationId = "x1234id"
+  private trait Test extends MockAuditService with MockDesConnector {
+    implicit val userDetails: UserDetails = UserDetails("1234567890", "Individual", None)
 
-  class Test extends MockDesConnector {
-    val service = new EopsDeclarationService(mockDesConnector)
+    val nino = Nino("AA123567A")
+    val from: LocalDate = LocalDate.parse("2017-01-01")
+    val to: LocalDate = LocalDate.parse("2018-01-01")
+    val selfEmploymentId = "test-se-id"
+    val correlationId = "x1234id"
+
+    val service = new EopsDeclarationService(mockAuditService, mockDesConnector)
   }
 
   "calling submit with valid arguments" should {
@@ -46,6 +51,8 @@ class EopsDeclarationServiceSpec extends ServiceSpec {
 
         MockDesConnector.submitEOPSDeclaration(nino.nino, from, to, selfEmploymentId)
           .returns(Future.successful(Right(correlationId)))
+
+        MockedAuditService.auditEventSucceeds(AuditEvent("auditType", "tx-name", "some details"))
 
         val result: Option[ErrorWrapper] = await(service.submit(
           EopsDeclarationSubmission(nino, selfEmploymentId, from, to)))

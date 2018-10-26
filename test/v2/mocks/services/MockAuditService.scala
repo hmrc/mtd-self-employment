@@ -14,26 +14,31 @@
  * limitations under the License.
  */
 
-package v2.mocks.connectors
-
-import java.time.LocalDate
+package v2.mocks.services
 
 import org.scalamock.handlers.CallHandler
 import org.scalamock.scalatest.MockFactory
+import play.api.libs.json.Writes
 import uk.gov.hmrc.http.HeaderCarrier
-import v2.connectors.DesConnector
-import v2.models.outcomes.EopsDeclarationOutcome
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
+import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
+import v2.models.audit.AuditEvent
+import v2.services.AuditService
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait MockDesConnector extends MockFactory{
+trait MockAuditService extends MockFactory {
 
-  val mockDesConnector = mock[DesConnector]
+  val mockAuditService: AuditService = mock[AuditService]
 
-  object MockDesConnector {
-    def submitEOPSDeclaration(nino: String, from: LocalDate, to: LocalDate, selfEmploymentId: String): CallHandler[Future[EopsDeclarationOutcome]] = {
-      (mockDesConnector.submitEOPSDeclaration(_: String, _: LocalDate, _: LocalDate, _: String)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(nino, from, to, selfEmploymentId, *, *)
+  object MockedAuditService {
+    def auditEventSucceeds[T](event: AuditEvent[T])(implicit ec: ExecutionContext): CallHandler[Future[AuditResult]] = {
+      (mockAuditService.auditEvent(_: AuditEvent[T])(_: HeaderCarrier, _: ExecutionContext, _: Writes[T]))
+        .expects(*, *, *, *)
+        .returns(Future {
+          Success
+        })
     }
   }
+
 }
