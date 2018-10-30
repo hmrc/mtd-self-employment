@@ -79,7 +79,7 @@ class EopsDeclarationService @Inject()(auditService: AuditService, connector: De
       submission.selfEmploymentId
     )
 
-    val event = AuditEvent("submitEndOfPeriodStatement", "uk-properties-submit-eops", details)
+    val event = AuditEvent("submitEndOfPeriodStatement", "self-employment-submit-eops", details)
 
     auditService.auditEvent(event)
   }
