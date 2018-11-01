@@ -1,4 +1,4 @@
-**Note: Please read before raising an issue**. This repository's issues are reserved for **Technical** queries relating to the MTD-Self-Employment-API Only. 
+**Note: Please read before raising an issue**. This repository's issues are reserved for **Technical** queries relating to the MTD-Self-Employment API Only. 
 If your issue falls into any of the below categories please contact SDST at SDSTeam@hmrc.gsi.gov.uk:
 - Issues relating to subscribing/registering to use the API Platform, MTD enrolment / de enrolment  / registration for VAT / BETA etc
 - Issues relating to OAuth2
