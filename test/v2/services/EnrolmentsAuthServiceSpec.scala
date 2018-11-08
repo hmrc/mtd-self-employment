@@ -37,6 +37,7 @@ class EnrolmentsAuthServiceSpec extends ServiceSpec {
     val authRetrievals: Retrieval[Option[AffinityGroup] ~ Enrolments] = affinityGroup and authorisedEnrolments
 
     object MockedAuthConnector {
+
       def authorised[A](predicate: Predicate, retrievals: Retrieval[A]): CallHandler[Future[A]] = {
         (mockAuthConnector.authorise[A](_: Predicate, _: Retrieval[A])(_: HeaderCarrier, _: ExecutionContext))
           .expects(predicate, retrievals, *, *)
@@ -68,45 +69,6 @@ class EnrolmentsAuthServiceSpec extends ServiceSpec {
 
         val retrievalsResult = new ~(Some(Organisation), Enrolments(Set.empty))
         val expected = Right(UserDetails("", "Organisation", None))
-
-        MockedAuthConnector.authorised(EmptyPredicate, authRetrievals)
-          .returns(Future.successful(retrievalsResult))
-
-        private val result = await(target.authorised(EmptyPredicate))
-
-        result shouldBe expected
-      }
-    }
-
-    "the user is an authorised agent" should {
-      val arn = "123567890"
-      val agentEnrolments = Enrolments(
-        Set(
-          Enrolment(
-            "HMRC-AS-AGENT",
-            Seq(EnrolmentIdentifier("AgentReferenceNumber", arn)),
-            "Active"
-          )
-        )
-      )
-
-      val retrievalsResult = new ~(Some(Agent), agentEnrolments)
-
-      "return the 'Agent' user type in the user details" in new Test {
-
-        val expected = Right(UserDetails("", "Agent", Some(arn)))
-
-        MockedAuthConnector.authorised(EmptyPredicate, authRetrievals)
-          .returns(Future.successful(retrievalsResult))
-
-        private val result = await(target.authorised(EmptyPredicate))
-
-        result shouldBe expected
-      }
-
-      "return the agent's ARN in the user details" in new Test {
-
-        val expected = Right(UserDetails("", "Agent", Some(arn)))
 
         MockedAuthConnector.authorised(EmptyPredicate, authRetrievals)
           .returns(Future.successful(retrievalsResult))
