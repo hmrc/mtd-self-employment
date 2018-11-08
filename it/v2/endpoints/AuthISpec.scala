@@ -74,6 +74,23 @@ class AuthISpec extends IntegrationBaseSpec {
       }
     }
 
+    "an MTD ID is successfully retrieve from the NINO and the agent is authorised" should {
+
+      "return 200" in new Test {
+        override val nino: String = "AA123456A"
+
+        override def setupStubs(): StubMapping = {
+          AuditStub.audit()
+          MtdIdLookupStub.ninoFound(nino)
+          AuthStub.authorisedAgent()
+          DesStub.submissionSuccess(nino, selfEmploymentId, from, to)
+        }
+
+        val response: WSResponse = await(request().post(Json.obj("finalised" -> true)))
+        response.status shouldBe Status.NO_CONTENT
+      }
+    }
+
     "an MTD ID is successfully retrieve from the NINO and the user is NOT logged in" should {
 
       "return 401" in new Test {

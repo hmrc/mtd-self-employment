@@ -37,7 +37,6 @@ class EopsDeclarationService @Inject()(auditService: AuditService, connector: De
             (implicit hc: HeaderCarrier,
              ec: ExecutionContext,
              userDetails: UserDetails): Future[Option[ErrorWrapper]] = {
-
     connector.submitEOPSDeclaration(submission.nino.nino, submission.from,
       submission.to, submission.selfEmploymentId).map {
       case Left(SingleError(error)) => Some(ErrorWrapper(desErrorToMtdError(error.code), None))
@@ -68,6 +67,7 @@ class EopsDeclarationService @Inject()(auditService: AuditService, connector: De
                                        (implicit ec: ExecutionContext,
                                         hc: HeaderCarrier,
                                         userDetails: UserDetails): Future[AuditResult] = {
+
     val details = EopsDeclarationAuditDetail(
       userDetails.userType,
       userDetails.agentReferenceNumber,

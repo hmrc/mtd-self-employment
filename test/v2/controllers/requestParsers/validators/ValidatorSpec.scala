@@ -124,7 +124,6 @@ class MockFunctionObject(name: String) {
   var called = 0
 
   def validate(shouldError: Boolean, errorToReturn: Option[MtdError]): List[MtdError] = {
-    println(s"[CALL RECEIVED] - $name")
     called = called + 1
     if (shouldError) List(errorToReturn.get) else List()
   }
