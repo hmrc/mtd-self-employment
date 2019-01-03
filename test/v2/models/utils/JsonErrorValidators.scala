@@ -16,14 +16,13 @@
 
 package v2.models.utils
 
-import play.api.data.validation.ValidationError
 import play.api.libs.json._
 import support.UnitSpec
 
 trait JsonErrorValidators {
   _: UnitSpec =>
 
-  type JsError = (JsPath, Seq[ValidationError])
+  type JsError = (JsPath, Seq[JsonValidationError])
   type JsErrors = Seq[JsError]
 
   object JsonError {
@@ -118,7 +117,7 @@ trait JsonErrorValidators {
     json.as[JsObject](updateReads)
   }
 
-  private def filterErrorByPath(jsPath: JsPath, jsError: JsError): ValidationError = {
+  private def filterErrorByPath(jsPath: JsPath, jsError: JsError): JsonValidationError = {
     jsError match {
       case (path, err :: Nil) if jsError.path == path => err
       case (path, _ :: Nil)=> fail(s"single error returned but path $path does not match $jsPath")
