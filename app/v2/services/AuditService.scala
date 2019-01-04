@@ -16,22 +16,21 @@
 
 package v2.services
 
-import javax.inject.{Inject, Singleton}
-
+import javax.inject.{Inject, Named, Singleton}
 import play.api.Configuration
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
-import uk.gov.hmrc.play.config.AppName
 import v2.models.audit.AuditEvent
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class AuditService @Inject()(auditConnector: AuditConnector,
-                             val appNameConfiguration: Configuration) extends AppName {
+                             @Named("appName") appName: String,
+                             configuration: Configuration) {
 
   def auditEvent[T](event: AuditEvent[T])(implicit hc: HeaderCarrier, ec: ExecutionContext, writer: Writes[T]): Future[AuditResult] = {
 

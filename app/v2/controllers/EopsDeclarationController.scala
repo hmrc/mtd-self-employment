@@ -18,8 +18,9 @@ package v2.controllers
 
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Action, AnyContentAsJson}
+import play.api.mvc.{Action, AnyContentAsJson, ControllerComponents}
 import v2.controllers.requestParsers.EopsDeclarationRequestDataParser
+import v2.models.auth.UserDetails
 import v2.models.errors.SubmitEopsDeclarationErrors._
 import v2.models.errors._
 import v2.models.inbound.EopsDeclarationRequestData
@@ -32,13 +33,15 @@ import scala.concurrent.Future
 class EopsDeclarationController @Inject()(val authService: EnrolmentsAuthService,
                                           val lookupService: MtdIdLookupService,
                                           eopsDeclarationService: EopsDeclarationService,
-                                          requestDataParser: EopsDeclarationRequestDataParser
-                                         ) extends AuthorisedController {
+                                          requestDataParser: EopsDeclarationRequestDataParser,
+                                          cc: ControllerComponents
+                                         ) extends AuthorisedController(cc) {
 
   def submit(nino: String, selfEmploymentId: String, from: String, to: String): Action[JsValue] =
     authorisedAction(nino).async(parse.json) { implicit request =>
 
-      implicit val userDetails = request.userDetails
+      implicit val userDetails: UserDetails = request.userDetails
+
       requestDataParser.parseRequest(EopsDeclarationRequestData(nino, selfEmploymentId, from, to, AnyContentAsJson(request.body))) match {
         case Right(eopsDeclarationSubmission) =>
           eopsDeclarationService.submit(eopsDeclarationSubmission).map {

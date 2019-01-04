@@ -46,7 +46,8 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
       authService = mockEnrolmentsAuthService,
       lookupService = mockMtdIdLookupService,
       eopsDeclarationService = mockEopsDeclarationService,
-      requestDataParser = mockRequestDataParser
+      requestDataParser = mockRequestDataParser,
+      cc = cc
     )
 
     MockedMtdIdLookupService.lookup(nino).returns(Future.successful(Right("test-mtd-id")))
