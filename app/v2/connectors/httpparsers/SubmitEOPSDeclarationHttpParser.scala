@@ -30,14 +30,14 @@ object SubmitEOPSDeclarationHttpParser extends HttpParser {
     new HttpReads[EopsDeclarationOutcome] {
       override def read(method: String, url: String, response: HttpResponse): EopsDeclarationOutcome = {
 
-        if(response.status != NO_CONTENT) {
+        if(response.status != ACCEPTED && response.status != NO_CONTENT) {
           logger.info("[SubmitEOPSDeclarationHttpParser][read] - " +
             s"Error response received from DES with status: ${response.status} and body\n" +
             s"${response.body} when calling $url")
         }
         response.status match {
 
-          case NO_CONTENT => Right(response.header("CorrelationId").getOrElse(""))
+          case ACCEPTED | NO_CONTENT => Right(response.header("CorrelationId").getOrElse(""))
           case BAD_REQUEST | FORBIDDEN | CONFLICT => Left(parseErrors(response))
           case NOT_FOUND => Left(GenericError(NotFoundError))
           case SERVICE_UNAVAILABLE => Left(GenericError(ServiceUnavailableError))
