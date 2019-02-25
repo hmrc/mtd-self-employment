@@ -32,6 +32,13 @@ class SubmitEopsDeclarationHttpParserSpec extends HttpParserSpec {
         val result = submitEOPSDeclarationHttpReads.read(POST, "/test", httpResponse)
         result shouldBe Right(correlationId)
       }
+      "the http response contains a 202 (as a workaround for a DES inconsistency)" in {
+        val correlationId = "x1234id"
+        val httpResponse = HttpResponse(ACCEPTED, None, Map("CorrelationId" -> Seq(correlationId)))
+
+        val result = submitEOPSDeclarationHttpReads.read(POST, "/test", httpResponse)
+        result shouldBe Right(correlationId)
+      }
     }
 
     "return a single error" when {
