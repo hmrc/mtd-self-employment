@@ -37,7 +37,11 @@ object SubmitEOPSDeclarationHttpParser extends HttpParser {
         }
         response.status match {
 
-          case ACCEPTED | NO_CONTENT => Right(response.header("CorrelationId").getOrElse(""))
+          case NO_CONTENT => Right(response.header("CorrelationId").getOrElse(""))
+          case ACCEPTED  =>
+            Logger.info("[SubmitEOPSDeclarationHttpParser][read] -" +
+              s"Status $ACCEPTED received from DES where $NO_CONTENT was expected: \n ${response.body}")
+            Right(response.header("CorrelationId").getOrElse(""))
           case BAD_REQUEST | FORBIDDEN | CONFLICT => Left(parseErrors(response))
           case NOT_FOUND => Left(GenericError(NotFoundError))
           case SERVICE_UNAVAILABLE => Left(GenericError(ServiceUnavailableError))
