@@ -16,4 +16,4 @@
 
 package v2.models.inbound
 
-trait InputData
+trait RawData
