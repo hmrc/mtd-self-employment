@@ -131,13 +131,13 @@ class EopsDeclarationController @Inject()(val authService: EnrolmentsAuthService
     errorWrapper.correlationId match {
       case Some(correlationId) =>
         logger.info(
-          "[CrystallisationController][getCorrelationId] - " +
+          "[EopsDeclarationController][getCorrelationId] - " +
             s"Error received from DES ${Json.toJson(errorWrapper)} with CorrelationId: $correlationId")
         correlationId
       case None =>
         val correlationId = UUID.randomUUID().toString
         logger.info(
-          "[CrystallisationController][getCorrelationId] - " +
+          "[EopsDeclarationController][getCorrelationId] - " +
             s"Validation error: ${Json.toJson(errorWrapper)} with CorrelationId: $correlationId")
         correlationId
     }
