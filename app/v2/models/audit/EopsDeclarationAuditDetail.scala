@@ -25,7 +25,8 @@ case class EopsDeclarationAuditDetail(userType: String,
                                       to: String,
                                       finalised: Boolean,
                                       `X-CorrelationId`: String,
-                                      incomeSourceId: String)
+                                      incomeSourceId: String,
+                                      response: EopsDeclarationAuditResponse)
 
 object EopsDeclarationAuditDetail {
   implicit val write: OWrites[EopsDeclarationAuditDetail] = Json.writes[EopsDeclarationAuditDetail]

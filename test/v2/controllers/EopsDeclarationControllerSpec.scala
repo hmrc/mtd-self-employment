@@ -24,13 +24,16 @@ import play.api.mvc.{AnyContentAsJson, Result}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.mocks.requestParsers.MockEopsDeclarationRequestDataParser
-import v2.mocks.services.{MockEnrolmentsAuthService, MockEopsDeclarationService, MockMtdIdLookupService}
+import v2.mocks.services.{MockAuditService, MockEnrolmentsAuthService, MockEopsDeclarationService, MockMtdIdLookupService}
 import v2.models.EopsDeclarationSubmission
+import v2.models.audit.AuditEvent
 import v2.models.errors.SubmitEopsDeclarationErrors._
 import v2.models.errors._
 import v2.models.inbound.EopsDeclarationRequestData
+import v2.models.outcomes.DesResponse
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class EopsDeclarationControllerSpec extends ControllerBaseSpec {
 
@@ -38,7 +41,8 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
     with MockMtdIdLookupService
     with MockEopsDeclarationService
     with MockEopsDeclarationRequestDataParser
-    with TableDrivenPropertyChecks {
+    with TableDrivenPropertyChecks
+    with MockAuditService {
 
     val hc = HeaderCarrier()
 
@@ -47,12 +51,13 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
       lookupService = mockMtdIdLookupService,
       eopsDeclarationService = mockEopsDeclarationService,
       requestDataParser = mockRequestDataParser,
+      auditService = mockAuditService,
       cc = cc
     )
 
     MockedMtdIdLookupService.lookup(nino).returns(Future.successful(Right("test-mtd-id")))
     MockedEnrolmentsAuthService.authoriseUser()
-
+    MockedAuditService.auditEventSucceeds(AuditEvent("submitEndOfPeriodStatement", "self-employment-submit-eops", "some details"))
   }
 
   private val requestJson =
@@ -62,17 +67,11 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
       |}
     """.stripMargin
 
-  private val invalidRequestJson =
-    """
-      |{
-      |"finalised": false
-      |}
-    """.stripMargin
-
   val nino: String = "AA123456A"
   val from: String = "2018-01-01"
   val to: String = "2018-12-31"
-  val selfEmploymentId = "ABCDEFGHIJKLMNO"
+  val selfEmploymentId = "X1IS12345678901"
+  val correlationId = "x1234id"
 
   "submit" should {
     "return a 204 (NO_CONTENT) response" when {
@@ -84,7 +83,7 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
         MockedEopsDeclarationRequestDataParser.parseRequest(eopsDeclarationRequestData)
           .returns(Right(eopsDeclarationSubmission))
         MockedEopsDeclarationService.submit(eopsDeclarationSubmission)
-          .returns(Future.successful(None))
+          .returns(Future.successful(Right(DesResponse(correlationId, ()))))
 
         val result = target.submit(nino, selfEmploymentId, from, to)(fakePostRequest[JsValue](Json.parse(requestJson)))
         status(result) shouldBe NO_CONTENT
@@ -112,7 +111,7 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
     "return a 400 (BAD_REQUEST) with multiple errors" when {
 
       "when a BadRequestError is generated" in new Test {
-        val badRequestErrorContainer = ErrorWrapper(BadRequestError, Some(Seq(MissingStartDateError,
+        val badRequestErrorContainer = ErrorWrapper(Some(correlationId), BadRequestError, Some(Seq(MissingStartDateError,
           InvalidEndDateError,
           NinoFormatError))
         )
@@ -124,7 +123,7 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
           .returns(Right(eopsDeclarationSubmission))
 
         MockedEopsDeclarationService.submit(eopsDeclarationSubmission)
-          .returns(Future.successful(Some(badRequestErrorContainer)))
+          .returns(Future.successful(Left(badRequestErrorContainer)))
 
         val response: Future[Result] = target.submit(nino, selfEmploymentId, from, to)(fakePostRequest[JsValue](Json.parse(requestJson)))
         status(response) shouldBe BAD_REQUEST
@@ -164,7 +163,7 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
           .returns(Right(eopsDeclarationSubmission))
 
         MockedEopsDeclarationService.submit(eopsDeclarationSubmission)
-          .returns(Future.successful(Some(ErrorWrapper(error, None))))
+          .returns(Future.successful(Left(ErrorWrapper(Some(correlationId), error, None))))
 
         val result = target.submit(nino, selfEmploymentId, from, to)(fakePostRequest[JsValue](Json.parse(requestJson)))
         status(result) shouldBe FORBIDDEN
@@ -177,7 +176,7 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
     "return a 403 (FORBIDDEN) with multiple errors" when {
 
       "when multiple BVR errors are generated" in new Test {
-        val bvrErrorsContainer = ErrorWrapper(BVRError, Some(Seq(
+        val bvrErrorsContainer = ErrorWrapper(Some(correlationId), BVRError, Some(Seq(
           RuleClass4Over16,
           RuleClass4PensionAge,
           RuleMismatchStartDate,
@@ -192,7 +191,7 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
           .returns(Right(eopsDeclarationSubmission))
 
         MockedEopsDeclarationService.submit(eopsDeclarationSubmission)
-          .returns(Future.successful(Some(bvrErrorsContainer)))
+          .returns(Future.successful(Left(bvrErrorsContainer)))
 
         val response: Future[Result] = target.submit(nino, selfEmploymentId, from, to)(fakePostRequest[JsValue](Json.parse(requestJson)))
         status(response) shouldBe FORBIDDEN
@@ -212,7 +211,7 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
         MockedEopsDeclarationRequestDataParser.parseRequest(eopsDeclarationRequestData)
           .returns(Right(eopsDeclarationSubmission))
         MockedEopsDeclarationService.submit(eopsDeclarationSubmission)
-          .returns(Future.successful(Some(ErrorWrapper(NotFoundError, None))))
+          .returns(Future.successful(Left(ErrorWrapper(Some(correlationId), NotFoundError, None))))
 
         val result = target.submit(nino, selfEmploymentId, from, to)(fakePostRequest[JsValue](Json.parse(requestJson)))
         status(result) shouldBe NOT_FOUND
@@ -230,7 +229,7 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
         MockedEopsDeclarationRequestDataParser.parseRequest(eopsDeclarationRequestData)
           .returns(Right(eopsDeclarationSubmission))
         MockedEopsDeclarationService.submit(eopsDeclarationSubmission)
-          .returns(Future.successful(Some(ErrorWrapper(DownstreamError, None))))
+          .returns(Future.successful(Left(ErrorWrapper(Some(correlationId), DownstreamError, None))))
 
         val result = target.submit(nino, selfEmploymentId, from, to)(fakePostRequest[JsValue](Json.parse(requestJson)))
         status(result) shouldBe INTERNAL_SERVER_ERROR
@@ -245,9 +244,9 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
       val eopsDeclarationSubmission = EopsDeclarationSubmission(Nino(nino), selfEmploymentId, LocalDate.parse(from), LocalDate.parse(to))
 
       MockedEopsDeclarationRequestDataParser.parseRequest(eopsDeclarationRequestData)
-        .returns(Left(ErrorWrapper(error, None)))
+        .returns(Left(ErrorWrapper(Some(correlationId), error, None)))
       MockedEopsDeclarationService.submit(eopsDeclarationSubmission)
-        .returns(Future.successful(Some(ErrorWrapper(error, None))))
+        .returns(Future.successful(Left(ErrorWrapper(Some(correlationId), error, None))))
       val response: Future[Result] = target.submit(nino, selfEmploymentId, from, to)(fakePostRequest[JsValue](Json.parse(requestJson)))
       status(response) shouldBe expectedStatus
       contentAsJson(response) shouldBe Json.toJson(error)

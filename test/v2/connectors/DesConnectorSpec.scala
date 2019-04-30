@@ -21,7 +21,7 @@ import java.time.LocalDate
 import play.api.http.HeaderNames
 import v2.mocks.{MockAppConfig, MockHttpClient}
 import v2.models.errors._
-import v2.models.outcomes.EopsDeclarationOutcome
+import v2.models.outcomes.{DesResponse, EopsDeclarationOutcome}
 
 import scala.concurrent.Future
 
@@ -64,10 +64,10 @@ class DesConnectorSpec extends ConnectorSpec {
     "return a None" when {
       "the http client returns None" in new Test {
         MockedHttpClient.postEmpty[EopsDeclarationOutcome](url)
-          .returns(Future.successful(Right(correlationId)))
+          .returns(Future.successful(Right(DesResponse(correlationId, ()))))
 
         val result: EopsDeclarationOutcome = await(connector.submitEOPSDeclaration(nino, from, to, selfEmploymentId))
-        result shouldBe Right(correlationId)
+        result shouldBe Right(DesResponse(correlationId, ()))
       }
     }
 
@@ -76,10 +76,10 @@ class DesConnectorSpec extends ConnectorSpec {
         val errorResponse = SingleError(NinoFormatError)
 
         MockedHttpClient.postEmpty[EopsDeclarationOutcome](url)
-          .returns(Future.successful(Left(errorResponse)))
+          .returns(Future.successful(Left(DesResponse(correlationId, errorResponse))))
 
         val result: EopsDeclarationOutcome = await(connector.submitEOPSDeclaration(nino, from, to, selfEmploymentId))
-        result shouldBe Left(errorResponse)
+        result shouldBe Left(DesResponse(correlationId, errorResponse))
       }
     }
   }

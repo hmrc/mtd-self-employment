@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-package v2.models
+package v2.models.audit
 
-import v2.models.auth.UserDetails
-import v2.models.errors.{DesError, MtdError}
+import play.api.libs.json.{Json, OWrites}
 
-package object outcomes {
+case class EopsDeclarationAuditResponse(httpStatus: Int, errors: Option[Seq[AuditError]])
 
-  type AuthOutcome = Either[MtdError, UserDetails]
-  type MtdIdLookupOutcome = Either[MtdError, String]
-  type DesConnectorOutcome[A] = Either[DesResponse[DesError], DesResponse[A]]
-  type EopsDeclarationOutcome = DesConnectorOutcome[Unit]
-
+object EopsDeclarationAuditResponse {
+  implicit val writes: OWrites[EopsDeclarationAuditResponse] = Json.writes[EopsDeclarationAuditResponse]
 }

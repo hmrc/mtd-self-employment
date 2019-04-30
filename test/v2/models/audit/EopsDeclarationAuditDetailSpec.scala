@@ -16,6 +16,7 @@
 
 package v2.models.audit
 
+import play.api.http.Status
 import play.api.libs.json.Json
 import support.UnitSpec
 import v2.models.utils.JsonErrorValidators
@@ -25,11 +26,12 @@ class EopsDeclarationAuditDetailSpec extends UnitSpec with JsonErrorValidators {
   val nino: String = "MA123456D"
   val from: String = "2017-06-04"
   val to: String = "2018-06-04"
+  private val responseSuccess = EopsDeclarationAuditResponse(Status.NO_CONTENT, None)
+  private val responseFail = EopsDeclarationAuditResponse(Status.BAD_REQUEST, Some(Seq(AuditError("FORMAT_NINO"))))
+  private val eopsDeclarationAuditDetail =
+    EopsDeclarationAuditDetail("Agent", Some("123456780"), nino, from, to, finalised = true, "5b85344c1100008e00c6a181", "XAIS12345678987", responseSuccess)
 
-  val eopsDeclarationAuditDetail =
-    EopsDeclarationAuditDetail("Agent", Some("123456780"), nino, from, to, true, "5b85344c1100008e00c6a181", "XAIS12345678987")
-
-  val eopsDeclarationAuditDetailAgentJson =
+  val eopsDeclarationAuditDetailAgentJson: String =
     """
       |{
       | "userType": "Agent",
@@ -39,11 +41,14 @@ class EopsDeclarationAuditDetailSpec extends UnitSpec with JsonErrorValidators {
       | "to": "2018-06-04",
       | "finalised": true,
       | "X-CorrelationId": "5b85344c1100008e00c6a181",
-      | "incomeSourceId": "XAIS12345678987"
+      | "incomeSourceId": "XAIS12345678987",
+      | "response": {
+      |    "httpStatus": 204
+      |  }
       |}
     """.stripMargin
 
-  val eopsDeclarationAuditDetailIndivualJson =
+  val eopsDeclarationAuditDetailIndivualJson: String =
     """
       |{
       | "userType": "individual",
@@ -52,7 +57,15 @@ class EopsDeclarationAuditDetailSpec extends UnitSpec with JsonErrorValidators {
       | "to": "2018-06-04",
       | "finalised": true,
       | "X-CorrelationId": "5b85344c1100008e00c6a181",
-      | "incomeSourceId": "XAIS12345678987"
+      | "incomeSourceId": "XAIS12345678987",
+      | "response": {
+      |    "httpStatus": 400,
+      |    "errors": [
+      |      {
+      |        "errorCode": "FORMAT_NINO"
+      |      }
+      |    ]
+      |  }
       |}
     """.stripMargin
 
@@ -63,7 +76,7 @@ class EopsDeclarationAuditDetailSpec extends UnitSpec with JsonErrorValidators {
     }
 
     "return a valid json with only mandatory fields" in {
-      Json.toJson(eopsDeclarationAuditDetail.copy(userType = "individual", agentReferenceNumber = None)) shouldBe
+      Json.toJson(eopsDeclarationAuditDetail.copy(userType = "individual", agentReferenceNumber = None, response = responseFail)) shouldBe
         Json.parse(eopsDeclarationAuditDetailIndivualJson)
     }
   }
