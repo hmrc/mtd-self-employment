@@ -28,8 +28,11 @@ class EopsDeclarationAuditDetailSpec extends UnitSpec with JsonErrorValidators {
   val to: String = "2018-06-04"
   private val responseSuccess = EopsDeclarationAuditResponse(Status.NO_CONTENT, None)
   private val responseFail = EopsDeclarationAuditResponse(Status.BAD_REQUEST, Some(Seq(AuditError("FORMAT_NINO"))))
+
+  val request = Json.obj("finalised" -> true)
+
   private val eopsDeclarationAuditDetail =
-    EopsDeclarationAuditDetail("Agent", Some("123456780"), nino, from, to, finalised = true, "5b85344c1100008e00c6a181", "XAIS12345678987", responseSuccess)
+    EopsDeclarationAuditDetail("Agent", Some("123456780"), nino, from, to, request, "5b85344c1100008e00c6a181", "XAIS12345678987", responseSuccess)
 
   val eopsDeclarationAuditDetailAgentJson: String =
     """
@@ -39,7 +42,9 @@ class EopsDeclarationAuditDetailSpec extends UnitSpec with JsonErrorValidators {
       | "nino": "MA123456D",
       | "from": "2017-06-04",
       | "to": "2018-06-04",
-      | "finalised": true,
+      | "request": {
+      |    "finalised": true
+      |  },
       | "X-CorrelationId": "5b85344c1100008e00c6a181",
       | "incomeSourceId": "XAIS12345678987",
       | "response": {
@@ -55,7 +60,9 @@ class EopsDeclarationAuditDetailSpec extends UnitSpec with JsonErrorValidators {
       | "nino": "MA123456D",
       | "from": "2017-06-04",
       | "to": "2018-06-04",
-      | "finalised": true,
+      | "request": {
+      |    "finalised": true
+      |  },
       | "X-CorrelationId": "5b85344c1100008e00c6a181",
       | "incomeSourceId": "XAIS12345678987",
       | "response": {

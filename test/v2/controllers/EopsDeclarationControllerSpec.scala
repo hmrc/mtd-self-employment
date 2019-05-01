@@ -244,12 +244,12 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
       val eopsDeclarationSubmission = EopsDeclarationSubmission(Nino(nino), selfEmploymentId, LocalDate.parse(from), LocalDate.parse(to))
 
       MockedEopsDeclarationRequestDataParser.parseRequest(eopsDeclarationRequestData)
-        .returns(Left(ErrorWrapper(Some(correlationId), error, None)))
-      MockedEopsDeclarationService.submit(eopsDeclarationSubmission)
-        .returns(Future.successful(Left(ErrorWrapper(Some(correlationId), error, None))))
+        .returns(Left(ErrorWrapper(None, error, None)))
+
       val response: Future[Result] = target.submit(nino, selfEmploymentId, from, to)(fakePostRequest[JsValue](Json.parse(requestJson)))
       status(response) shouldBe expectedStatus
       contentAsJson(response) shouldBe Json.toJson(error)
+      header("X-CorrelationId", response).nonEmpty shouldBe true
     }
   }
 

@@ -23,7 +23,7 @@ case class EopsDeclarationAuditDetail(userType: String,
                                       nino: String,
                                       from: String,
                                       to: String,
-                                      finalised: Boolean,
+                                      request: JsValue,
                                       `X-CorrelationId`: String,
                                       incomeSourceId: String,
                                       response: EopsDeclarationAuditResponse)

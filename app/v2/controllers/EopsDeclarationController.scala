@@ -55,23 +55,22 @@ class EopsDeclarationController @Inject()(val authService: EnrolmentsAuthService
         case Right(eopsDeclarationSubmission) =>
           eopsDeclarationService.submit(eopsDeclarationSubmission).map {
             case Right(desResponse) =>
-              auditEopsSubmission(nino, selfEmploymentId, from, to,
+              auditEopsSubmission(nino, selfEmploymentId, from, to, request.request.body,
                 desResponse.correlationId, userDetails, EopsDeclarationAuditResponse(NO_CONTENT, None))
               NoContent.withHeaders("X-CorrelationId" -> desResponse.correlationId)
             case Left(errorResponse) =>
               val correlationId = getCorrelationId(errorResponse)
               val result        = processError(errorResponse).withHeaders("X-CorrelationId" -> correlationId)
-              auditEopsSubmission(nino, selfEmploymentId, from, to, getCorrelationId(errorResponse),
+              auditEopsSubmission(nino, selfEmploymentId, from, to, request.request.body, getCorrelationId(errorResponse),
                 userDetails, EopsDeclarationAuditResponse(result.header.status, Some(errorResponse.allErrors.map(error => AuditError(error.code)))))
               result
           }
-        case Left(validationErrorResponse) => Future {
+        case Left(validationErrorResponse) =>
           val correlationId = getCorrelationId(validationErrorResponse)
           val result        = processError(validationErrorResponse).withHeaders("X-CorrelationId" -> correlationId)
-          auditEopsSubmission(nino,selfEmploymentId, from, to, getCorrelationId(validationErrorResponse),
+          auditEopsSubmission(nino,selfEmploymentId, from, to, request.request.body, getCorrelationId(validationErrorResponse),
             userDetails, EopsDeclarationAuditResponse(result.header.status, Some(validationErrorResponse.allErrors.map(error => AuditError(error.code)))))
-          result
-        }
+          Future.successful(result)
       }
     }
 
@@ -104,6 +103,7 @@ class EopsDeclarationController @Inject()(val authService: EnrolmentsAuthService
                                   selfEmploymentId: String,
                                   fromDate: String,
                                   toDate: String,
+                                  request: JsValue,
                                   correlationId: String,
                                   userDetails: UserDetails,
                                   eopsDeclarationAuditResponse: EopsDeclarationAuditResponse)
@@ -116,7 +116,7 @@ class EopsDeclarationController @Inject()(val authService: EnrolmentsAuthService
       nino,
       fromDate,
       toDate,
-      finalised = true,
+      request,
       correlationId,
       selfEmploymentId,
       eopsDeclarationAuditResponse

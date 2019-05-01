@@ -39,7 +39,7 @@ object SubmitEOPSDeclarationHttpParser extends HttpParser {
 
           case NO_CONTENT => Right(DesResponse(retrieveCorrelationId(response), ()))
           case ACCEPTED  =>
-            Logger.info("[SubmitEOPSDeclarationHttpParser][read] -" +
+            logger.info("[SubmitEOPSDeclarationHttpParser][read] -" +
               s"Status $ACCEPTED received from DES where $NO_CONTENT was expected: \n ${response.body}")
             Right(DesResponse(retrieveCorrelationId(response), ()))
           case BAD_REQUEST | FORBIDDEN | CONFLICT => Left(DesResponse(retrieveCorrelationId(response), parseErrors(response)))
