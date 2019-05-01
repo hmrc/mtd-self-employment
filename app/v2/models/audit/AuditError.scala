@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-package v2.models
+package v2.models.audit
 
-import v2.models.auth.UserDetails
-import v2.models.errors.{DesError, MtdError}
+import play.api.libs.json.{Json, OFormat}
 
-package object outcomes {
+case class AuditError(errorCode: String)
 
-  type AuthOutcome = Either[MtdError, UserDetails]
-  type MtdIdLookupOutcome = Either[MtdError, String]
-  type DesConnectorOutcome[A] = Either[DesResponse[DesError], DesResponse[A]]
-  type EopsDeclarationOutcome = DesConnectorOutcome[Unit]
-
+object AuditError {
+  implicit val format: OFormat[AuditError] = Json.format[AuditError]
 }

@@ -20,7 +20,7 @@ import play.api.Logger
 import play.api.http.Status._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import v2.models.errors.{GenericError, NotFoundError, ServiceUnavailableError, _}
-import v2.models.outcomes.EopsDeclarationOutcome
+import v2.models.outcomes.{DesResponse, EopsDeclarationOutcome}
 
 object SubmitEOPSDeclarationHttpParser extends HttpParser {
 
@@ -37,15 +37,15 @@ object SubmitEOPSDeclarationHttpParser extends HttpParser {
         }
         response.status match {
 
-          case NO_CONTENT => Right(response.header("CorrelationId").getOrElse(""))
+          case NO_CONTENT => Right(DesResponse(retrieveCorrelationId(response), ()))
           case ACCEPTED  =>
-            Logger.info("[SubmitEOPSDeclarationHttpParser][read] -" +
+            logger.info("[SubmitEOPSDeclarationHttpParser][read] -" +
               s"Status $ACCEPTED received from DES where $NO_CONTENT was expected: \n ${response.body}")
-            Right(response.header("CorrelationId").getOrElse(""))
-          case BAD_REQUEST | FORBIDDEN | CONFLICT => Left(parseErrors(response))
-          case NOT_FOUND => Left(GenericError(NotFoundError))
-          case SERVICE_UNAVAILABLE => Left(GenericError(ServiceUnavailableError))
-          case _ => Left(GenericError(DownstreamError))
+            Right(DesResponse(retrieveCorrelationId(response), ()))
+          case BAD_REQUEST | FORBIDDEN | CONFLICT => Left(DesResponse(retrieveCorrelationId(response), parseErrors(response)))
+          case NOT_FOUND => Left(DesResponse(retrieveCorrelationId(response), GenericError(NotFoundError)))
+          case SERVICE_UNAVAILABLE => Left(DesResponse(retrieveCorrelationId(response), GenericError(ServiceUnavailableError)))
+          case _ => Left(DesResponse(retrieveCorrelationId(response), GenericError(DownstreamError)))
         }
       }
     }

@@ -69,7 +69,7 @@ class EopsDeclarationRequestDataParserSpec extends UnitSpec {
           EopsDeclarationRequestData(invalidNino, validSelfEmploymentId, validFromDate, validToDate, validJsonBody)
 
         val singleErrorWrapper =
-          ErrorWrapper(NinoFormatError, None)
+          ErrorWrapper(None, NinoFormatError, None)
 
         MockedEopsDeclarationInputDataValidator.validate(eopsDeclarationRequestData)
           .returns(List(NinoFormatError))
@@ -82,7 +82,7 @@ class EopsDeclarationRequestDataParserSpec extends UnitSpec {
           EopsDeclarationRequestData(invalidNino, validSelfEmploymentId, invalidFromDate, validToDate, validJsonBody)
 
         val multipleErrorWrapper =
-          ErrorWrapper(BadRequestError, Some(Seq(NinoFormatError, InvalidStartDateError)))
+          ErrorWrapper(None, BadRequestError, Some(Seq(NinoFormatError, InvalidStartDateError)))
 
         MockedEopsDeclarationInputDataValidator.validate(eopsDeclarationRequestData)
           .returns(List(NinoFormatError, InvalidStartDateError))

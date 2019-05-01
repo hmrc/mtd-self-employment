@@ -14,16 +14,28 @@
  * limitations under the License.
  */
 
-package v2.models
+package v2.models.audit
 
-import v2.models.auth.UserDetails
-import v2.models.errors.{DesError, MtdError}
+import play.api.libs.json.Json
+import support.UnitSpec
 
-package object outcomes {
+class AuditErrorSpec extends UnitSpec {
 
-  type AuthOutcome = Either[MtdError, UserDetails]
-  type MtdIdLookupOutcome = Either[MtdError, String]
-  type DesConnectorOutcome[A] = Either[DesResponse[DesError], DesResponse[A]]
-  type EopsDeclarationOutcome = DesConnectorOutcome[Unit]
+  private val auditError = AuditError("FORMAT_NINO")
 
+  "writes" when {
+    "passed an audit error model" should {
+      "produce valid json" in {
+
+         val json = Json.parse(
+          s"""
+             |{
+             |  "errorCode": "FORMAT_NINO"
+             |}
+           """.stripMargin)
+
+        Json.toJson(auditError) shouldBe json
+      }
+    }
+  }
 }
