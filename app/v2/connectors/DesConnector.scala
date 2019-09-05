@@ -36,7 +36,7 @@ class DesConnector @Inject()(http: HttpClient,
 
   private[connectors] def desHeaderCarrier(implicit hc: HeaderCarrier): HeaderCarrier = hc
     .copy(authorization = Some(Authorization(s"Bearer ${appConfig.desToken}")))
-    .withExtraHeaders("Environment" -> appConfig.desEnv)
+    .withExtraHeaders("Environment" -> appConfig.desEnv, "Content-Type" -> "application/json")
 
   def submitEOPSDeclaration(nino: String, from: LocalDate, to: LocalDate, selfEmploymentId: String)
                            (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[EopsDeclarationOutcome] = {
