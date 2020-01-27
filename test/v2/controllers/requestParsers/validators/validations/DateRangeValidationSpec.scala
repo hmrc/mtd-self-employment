@@ -19,7 +19,7 @@ package v2.controllers.requestParsers.validators.validations
 import java.time.LocalDate
 
 import support.UnitSpec
-import v2.models.errors.{InvalidRangeError, NinoFormatError}
+import v2.models.errors.InvalidRangeError
 import v2.models.utils.JsonErrorValidators
 
 class DateRangeValidationSpec extends UnitSpec with JsonErrorValidators {
