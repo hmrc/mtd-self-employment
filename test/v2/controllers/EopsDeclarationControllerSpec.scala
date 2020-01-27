@@ -241,7 +241,6 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
   def eopsErrorStatusTester(error: MtdError, expectedStatus: Int): Unit = {
     s"when a ${error.code} error occurs" in new Test {
       val eopsDeclarationRequestData = EopsDeclarationRequestData(nino, selfEmploymentId, from, to, AnyContentAsJson(Json.parse(requestJson)))
-      val eopsDeclarationSubmission = EopsDeclarationSubmission(Nino(nino), selfEmploymentId, LocalDate.parse(from), LocalDate.parse(to))
 
       MockedEopsDeclarationRequestDataParser.parseRequest(eopsDeclarationRequestData)
         .returns(Left(ErrorWrapper(None, error, None)))
