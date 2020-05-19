@@ -145,7 +145,8 @@ class EopsDeclarationControllerSpec extends ControllerBaseSpec {
         RuleConsolidatedExpenses,
         BVRError,
         EarlySubmissionError,
-        LateSubmissionError
+        LateSubmissionError,
+        NonMatchingPeriodError
       )
 
       for (error <- forbiddenErrors) {

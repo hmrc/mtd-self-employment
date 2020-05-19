@@ -24,6 +24,9 @@ object SubmitEopsDeclarationErrors {
 
   object LateSubmissionError extends MtdError("RULE_LATE_SUBMISSION", "The period to finalise has passed")
 
+  object NonMatchingPeriodError
+    extends MtdError("RULE_NON_MATCHING_PERIOD", "An End of Period Statement without a matching accounting period cannot be submitted")
+
 
   //  BVR Errors
 
