@@ -65,6 +65,7 @@ class EopsDeclarationService @Inject()(connector: DesConnector) {
     "INVALID_ACCOUNTINGPERIODENDDATE" -> InvalidEndDateError,
     "CONFLICT" -> ConflictError,
     "EARLY_SUBMISSION" -> EarlySubmissionError,
+    "NON_MATCHING_PERIOD" -> NonMatchingPeriodError,
     "LATE_SUBMISSION" -> LateSubmissionError,
     "SERVER_ERROR" -> DownstreamError,
     "SERVICE_UNAVAILABLE" -> ServiceUnavailableError,
