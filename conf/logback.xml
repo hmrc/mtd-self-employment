@@ -45,7 +45,7 @@
 
     <logger name="com.google.inject" level="INFO"/>
     <logger name="uk.gov" level="INFO"/>
-    <logger name="akka" level="ERROR"/>
+    <logger name="akka.io.TcpListener" level="ERROR"/>
 
     <logger name="application" level="INFO"/>
     <logger name="org.asynchttpclient.netty" level="INFO"/>
