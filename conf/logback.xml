@@ -44,21 +44,21 @@
     </logger>
 
     <logger name="com.google.inject" level="INFO"/>
-    <logger name="uk.gov" level="INFO"/>
-    <logger name="akka.io.TcpListener" level="ERROR"/>
-
     <logger name="application" level="INFO"/>
     <logger name="org.asynchttpclient.netty" level="INFO"/>
+
     <logger name="uk.gov.hmrc.play.bootstrap.audit" level="WARN"/>
     <logger name="uk.gov.hmrc.audit" level="WARN"/>
-    <logger name="io.netty" level="WARN"/>
-    <logger name="play.core.netty.testUtils.ServerCookieDecoder" level="WARN"/>
+    <logger name="akka" level="ERROR"/>
 
-    <logger name="connector" level="TRACE">
+    <logger name="io.netty" level="WARN"/>
+    <logger name="play.core.netty" level="WARN"/>
+
+    <logger name="connector" level="WARN">
         <appender-ref ref="STDOUT"/>
     </logger>
 
-    <root level="INFO">
+    <root level="WARN">
         <appender-ref ref="FILE"/>
         <appender-ref ref="STDOUT"/>
     </root>
