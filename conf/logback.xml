@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
+    <define name="logger.level.application" class="uk.gov.hmrc.portal.logging.TypesafePropertyDefiner">
+        <propertyName>logger.level.application</propertyName>
+    </define>
+
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
         <file>logs/$name$.log</file>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
@@ -45,7 +49,7 @@
 
     <logger name="com.google.inject" level="INFO"/>
     <logger name="uk.gov" level="INFO"/>
-    <logger name="application" level="DEBUG"/>
+    <logger name="application" level="${logger.level.application}"/>
     <logger name="akka" level="ERROR"/>
 
 
