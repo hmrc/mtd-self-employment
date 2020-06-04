@@ -31,6 +31,7 @@ lazy val microservice = Project(appName, file("."))
     evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
     scalaVersion := "2.12.10"
   )
+  .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(majorVersion := 0)
   .settings(publishingSettings: _*)
   .settings(CodeCoverageSettings.settings: _*)
