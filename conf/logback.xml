@@ -45,7 +45,7 @@
 
     <logger name="com.google.inject" level="INFO"/>
     <logger name="application" level="INFO"/>
-    <logger name="org.asynchttpclient.netty" level="INFO"/>
+    <logger name="play.shaded.ahc" level="WARN"/>
 
     <logger name="uk.gov.hmrc.play.bootstrap" level="WARN"/>
     <logger name="uk.gov.hmrc.audit" level="WARN"/>
