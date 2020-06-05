@@ -50,6 +50,7 @@
     <logger name="uk.gov.hmrc.play.bootstrap.audit" level="WARN"/>
     <logger name="uk.gov.hmrc.audit" level="WARN"/>
     <logger name="akka" level="ERROR"/>
+    <logger name="akka.io.TcpListener" level="ERROR"/>
 
     <logger name="io.netty" level="WARN"/>
     <logger name="play.core.netty" level="WARN"/>
