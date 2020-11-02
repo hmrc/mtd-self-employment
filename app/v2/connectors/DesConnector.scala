@@ -32,14 +32,17 @@ import scala.concurrent.{ExecutionContext, Future}
 class DesConnector @Inject()(http: HttpClient,
                              appConfig: AppConfig) {
 
-  val logger = Logger(this.getClass)
+  val logger: Logger = Logger(this.getClass)
 
-  private[connectors] def desHeaderCarrier(implicit hc: HeaderCarrier): HeaderCarrier = hc
+  private[connectors] def desHeaderCarrier(implicit hc: HeaderCarrier, correlationId: String): HeaderCarrier = hc
     .copy(authorization = Some(Authorization(s"Bearer ${appConfig.desToken}")))
-    .withExtraHeaders("Environment" -> appConfig.desEnv, "Content-Type" -> "application/json")
+    .withExtraHeaders("Environment" -> appConfig.desEnv, "Content-Type" -> "application/json", "CorrelationId" -> correlationId)
 
-  def submitEOPSDeclaration(nino: String, from: LocalDate, to: LocalDate, selfEmploymentId: String)
-                           (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[EopsDeclarationOutcome] = {
+  def submitEOPSDeclaration(nino: String, from: LocalDate, to: LocalDate, selfEmploymentId: String)(
+    implicit hc: HeaderCarrier,
+    ec: ExecutionContext,
+    correlationId: String): Future[EopsDeclarationOutcome] = {
+
     import v2.connectors.httpparsers.SubmitEOPSDeclarationHttpParser.submitEOPSDeclarationHttpReads
 
     val url = s"${appConfig.desBaseUrl}/income-tax/income-sources/nino/$nino/self-employment/$from/$to/declaration?incomeSourceId=$selfEmploymentId"

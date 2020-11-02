@@ -30,11 +30,12 @@ import v2.models.inbound.EopsDeclarationRequestData
 
 class EopsDeclarationRequestDataParserSpec extends UnitSpec {
 
-  val validNino = "AA123456A"
-  val validSelfEmploymentId = "X1AAAAAAAAAAAA5"
-  val validFromDate = "2018-01-01"
-  val validToDate = "2018-12-31"
-  val validJsonBody = AnyContentAsJson(Json.obj("finalised" -> true))
+  val validNino: String = "AA123456A"
+  val validSelfEmploymentId: String = "X1AAAAAAAAAAAA5"
+  val validFromDate: String = "2018-01-01"
+  val validToDate: String = "2018-12-31"
+  val validJsonBody: AnyContentAsJson = AnyContentAsJson(Json.obj("finalised" -> true))
+  implicit val correlationId: String = "a1e8057e-fbbc-47a8-a8b4-78d9f015c253"
 
   trait Test extends MockEopsDeclarationRequestDataValidator {
     lazy val parser = new EopsDeclarationRequestDataParser(mockValidator)
@@ -46,10 +47,10 @@ class EopsDeclarationRequestDataParserSpec extends UnitSpec {
     "return an EopsDeclaration submission" when {
       "valid request data is supplied" in new Test {
 
-        val eopsDeclarationRequestData =
+        val eopsDeclarationRequestData: EopsDeclarationRequestData =
         EopsDeclarationRequestData(validNino, validSelfEmploymentId, validFromDate, validToDate, validJsonBody)
 
-        val eopsDeclarationSubmissionRequest =
+        val eopsDeclarationSubmissionRequest: EopsDeclarationSubmission =
         EopsDeclarationSubmission(Nino(validNino), validSelfEmploymentId, LocalDate.parse(validFromDate), LocalDate.parse(validToDate))
 
 
@@ -61,15 +62,15 @@ class EopsDeclarationRequestDataParserSpec extends UnitSpec {
 
     "return an ErrorWrapper" when {
 
-      val invalidNino = "foobar"
-      val invalidFromDate = "bad-date"
+      val invalidNino: String = "foobar"
+      val invalidFromDate: String = "bad-date"
 
       "a single validation error occurs" in new Test {
-        val eopsDeclarationRequestData =
+        val eopsDeclarationRequestData: EopsDeclarationRequestData =
           EopsDeclarationRequestData(invalidNino, validSelfEmploymentId, validFromDate, validToDate, validJsonBody)
 
-        val singleErrorWrapper =
-          ErrorWrapper(None, NinoFormatError, None)
+        val singleErrorWrapper: ErrorWrapper =
+          ErrorWrapper(correlationId, NinoFormatError, None)
 
         MockedEopsDeclarationInputDataValidator.validate(eopsDeclarationRequestData)
           .returns(List(NinoFormatError))
@@ -78,11 +79,11 @@ class EopsDeclarationRequestDataParserSpec extends UnitSpec {
       }
 
       "multiple validation errors occur" in new Test {
-        val eopsDeclarationRequestData =
+        val eopsDeclarationRequestData: EopsDeclarationRequestData =
           EopsDeclarationRequestData(invalidNino, validSelfEmploymentId, invalidFromDate, validToDate, validJsonBody)
 
-        val multipleErrorWrapper =
-          ErrorWrapper(None, BadRequestError, Some(Seq(NinoFormatError, InvalidStartDateError)))
+        val multipleErrorWrapper: ErrorWrapper =
+          ErrorWrapper(correlationId, BadRequestError, Some(Seq(NinoFormatError, InvalidStartDateError)))
 
         MockedEopsDeclarationInputDataValidator.validate(eopsDeclarationRequestData)
           .returns(List(NinoFormatError, InvalidStartDateError))

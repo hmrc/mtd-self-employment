@@ -16,12 +16,9 @@
 
 package v2.controllers
 
-import java.util.UUID
-
 import javax.inject.{Inject, Singleton}
-import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Action, AnyContentAsJson, ControllerComponents}
+import play.api.mvc.{Action, AnyContentAsJson, ControllerComponents, Result}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import v2.controllers.requestParsers.EopsDeclarationRequestDataParser
@@ -31,6 +28,7 @@ import v2.models.errors.SubmitEopsDeclarationErrors._
 import v2.models.errors._
 import v2.models.inbound.EopsDeclarationRequestData
 import v2.services.{AuditService, EnrolmentsAuthService, EopsDeclarationService, MtdIdLookupService}
+import v2.utils.{IdGenerator, Logging}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -40,13 +38,23 @@ class EopsDeclarationController @Inject()(val authService: EnrolmentsAuthService
                                           eopsDeclarationService: EopsDeclarationService,
                                           requestDataParser: EopsDeclarationRequestDataParser,
                                           auditService: AuditService,
-                                          cc: ControllerComponents
-                                         )(implicit ec: ExecutionContext) extends AuthorisedController(cc) {
+                                          cc: ControllerComponents,
+                                          val idGenerator: IdGenerator)(implicit ec: ExecutionContext)
+  extends AuthorisedController(cc) with Logging {
 
-  val logger: Logger = Logger(this.getClass)
+  implicit val endpointLogContext: EndpointLogContext =
+    EndpointLogContext(
+      controllerName = "EopsDeclarationController",
+      endpointName = "submitEndOfPeriodStatement"
+    )
 
   def submit(nino: String, selfEmploymentId: String, from: String, to: String): Action[JsValue] =
     authorisedAction(nino).async(parse.json) { implicit request =>
+
+      implicit val correlationId: String = idGenerator.generateCorrelationId
+      logger.info(
+        s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] " +
+          s"with CorrelationId: $correlationId")
 
       implicit val userDetails: UserDetails = request.userDetails
 
@@ -54,26 +62,34 @@ class EopsDeclarationController @Inject()(val authService: EnrolmentsAuthService
         case Right(eopsDeclarationSubmission) =>
           eopsDeclarationService.submit(eopsDeclarationSubmission).map {
             case Right(desResponse) =>
+              logger.info(s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}]" +
+                s" - Success response received with CorrelationId: ${desResponse.correlationId}")
               auditEopsSubmission(nino, selfEmploymentId, from, to, request.request.body,
                 desResponse.correlationId, userDetails, EopsDeclarationAuditResponse(NO_CONTENT, None))
               NoContent.withHeaders("X-CorrelationId" -> desResponse.correlationId)
             case Left(errorResponse) =>
-              val correlationId = getCorrelationId(errorResponse)
-              val result        = processError(errorResponse).withHeaders("X-CorrelationId" -> correlationId)
-              auditEopsSubmission(nino, selfEmploymentId, from, to, request.request.body, getCorrelationId(errorResponse),
+              val resCorrelationId = errorResponse.correlationId
+              val result = processError(errorResponse).withHeaders("X-CorrelationId" -> resCorrelationId)
+              logger.info(
+                s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
+                  s"Error response received with CorrelationId: $resCorrelationId")
+              auditEopsSubmission(nino, selfEmploymentId, from, to, request.request.body, resCorrelationId,
                 userDetails, EopsDeclarationAuditResponse(result.header.status, Some(errorResponse.allErrors.map(error => AuditError(error.code)))))
               result
           }
         case Left(validationErrorResponse) =>
-          val correlationId = getCorrelationId(validationErrorResponse)
-          val result        = processError(validationErrorResponse).withHeaders("X-CorrelationId" -> correlationId)
-          auditEopsSubmission(nino,selfEmploymentId, from, to, request.request.body, getCorrelationId(validationErrorResponse),
+          val resCorrelationId = validationErrorResponse.correlationId
+          val result = processError(validationErrorResponse).withHeaders("X-CorrelationId" -> resCorrelationId)
+          logger.info(
+            s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
+              s"Error response received with CorrelationId: $resCorrelationId")
+          auditEopsSubmission(nino, selfEmploymentId, from, to, request.request.body, resCorrelationId,
             userDetails, EopsDeclarationAuditResponse(result.header.status, Some(validationErrorResponse.allErrors.map(error => AuditError(error.code)))))
           Future.successful(result)
       }
     }
 
-  private def processError(errorResponse: ErrorWrapper) = {
+  private def processError(errorResponse: ErrorWrapper): Result = {
     (errorResponse.error: @unchecked) match {
       case InvalidStartDateError
            | InvalidEndDateError
@@ -125,22 +141,6 @@ class EopsDeclarationController @Inject()(val authService: EnrolmentsAuthService
     val event = AuditEvent("submitEndOfPeriodStatement", "self-employment-submit-eops", details)
 
     auditService.auditEvent(event)
-  }
-
-  private def getCorrelationId(errorWrapper: ErrorWrapper): String = {
-    errorWrapper.correlationId match {
-      case Some(correlationId) =>
-        logger.info(
-          "[EopsDeclarationController][getCorrelationId] - " +
-            s"Error received from DES ${Json.toJson(errorWrapper)} with CorrelationId: $correlationId")
-        correlationId
-      case None =>
-        val correlationId = UUID.randomUUID().toString
-        logger.info(
-          "[EopsDeclarationController][getCorrelationId] - " +
-            s"Validation error: ${Json.toJson(errorWrapper)} with CorrelationId: $correlationId")
-        correlationId
-    }
   }
 
 }
