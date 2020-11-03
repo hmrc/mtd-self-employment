@@ -31,28 +31,30 @@ class EopsDeclarationService @Inject()(connector: DesConnector) {
 
   val logger: Logger = Logger(this.getClass)
 
-  def submit(submission: EopsDeclarationSubmission)
-            (implicit hc: HeaderCarrier,
-             ec: ExecutionContext): Future[Either[ErrorWrapper, DesResponse[Unit]]] = {
+  def submit(submission: EopsDeclarationSubmission)(
+    implicit hc: HeaderCarrier,
+    ec: ExecutionContext,
+    correlationId: String): Future[Either[ErrorWrapper, DesResponse[Unit]]] = {
+
     connector.submitEOPSDeclaration(submission.nino.nino, submission.from,
       submission.to, submission.selfEmploymentId).map {
-      case Left(DesResponse(correlationId, SingleError(error))) => Left(ErrorWrapper(Some(correlationId), desErrorToMtdError(error.code), None))
+      case Left(DesResponse(correlationId, SingleError(error))) => Left(ErrorWrapper(correlationId, desErrorToMtdError(error.code), None))
       case Left(DesResponse(correlationId, MultipleErrors(errors))) =>
         val mtdErrors = errors.map(error => desErrorToMtdError(error.code))
         if (mtdErrors.contains(DownstreamError)) {
-          logger.info("[EopsDeclarationService] [submit] - downstream returned INVALID_IDTYPE. Revert to ISE")
-          Left(ErrorWrapper(Some(correlationId), DownstreamError, None))
+          logger.info(s"[EopsDeclarationService] [submit] - downstream returned INVALID_IDTYPE with CorrelationId: $correlationId. Revert to ISE")
+          Left(ErrorWrapper(correlationId, DownstreamError, None))
         }
         else {
-          Left(ErrorWrapper(Some(correlationId), BadRequestError, Some(mtdErrors)))
+          Left(ErrorWrapper(correlationId, BadRequestError, Some(mtdErrors)))
         }
       case Left(DesResponse(correlationId, BVRErrors(errors))) =>
         if (errors.size == 1) {
-          Left(ErrorWrapper(Some(correlationId), desBvrErrorToMtdError(errors.head.code), None))
+          Left(ErrorWrapper(correlationId, desBvrErrorToMtdError(errors.head.code), None))
         } else {
-          Left(ErrorWrapper(Some(correlationId), BVRError, Some(errors.map(_.code).map(desBvrErrorToMtdError))))
+          Left(ErrorWrapper(correlationId, BVRError, Some(errors.map(_.code).map(desBvrErrorToMtdError))))
         }
-      case Left(DesResponse(correlationId, GenericError(error))) => Left(ErrorWrapper(Some(correlationId), error, None))
+      case Left(DesResponse(correlationId, GenericError(error))) => Left(ErrorWrapper(correlationId, error, None))
       case Right(desResponse) => Right(desResponse)
     }
   }

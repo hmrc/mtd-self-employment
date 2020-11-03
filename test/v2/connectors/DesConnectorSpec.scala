@@ -53,13 +53,12 @@ class DesConnectorSpec extends ConnectorSpec {
 
   "submitEOPSDeclaration" should {
 
-    val nino = "AA12356A"
-    val from = LocalDate.parse("2017-01-01")
-    val to = LocalDate.parse("2018-01-01")
-    val selfEmploymentId = "test-se-id"
-    val correlationId = "x1234id"
+    val nino: String = "AA12356A"
+    val from: LocalDate = LocalDate.parse("2017-01-01")
+    val to: LocalDate = LocalDate.parse("2018-01-01")
+    val selfEmploymentId: String = "test-se-id"
 
-    val url = s"$baseUrl/income-tax/income-sources/nino/$nino/self-employment/$from/$to/declaration?incomeSourceId=$selfEmploymentId"
+    val url: String = s"$baseUrl/income-tax/income-sources/nino/$nino/self-employment/$from/$to/declaration?incomeSourceId=$selfEmploymentId"
 
     "return a None" when {
       "the http client returns None" in new Test {
@@ -73,7 +72,7 @@ class DesConnectorSpec extends ConnectorSpec {
 
     "return an ErrorWrapper" when {
       "the http client returns an error response" in new Test {
-        val errorResponse = SingleError(NinoFormatError)
+        val errorResponse: SingleError = SingleError(NinoFormatError)
 
         MockedHttpClient.postEmpty[EopsDeclarationOutcome](url)
           .returns(Future.successful(Left(DesResponse(correlationId, errorResponse))))

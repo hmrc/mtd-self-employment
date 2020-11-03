@@ -18,7 +18,7 @@ package v2.endpoints
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.http.Status
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 import play.api.libs.ws.{WSRequest, WSResponse}
 import support.IntegrationBaseSpec
 import v2.stubs.{AuditStub, AuthStub, DesStub, MtdIdLookupStub}
@@ -40,9 +40,9 @@ class EopsDeclarationControllerISpec extends IntegrationBaseSpec {
     }
   }
 
-  "Calling the sample endpoint" should {
+  "Calling the EOPS declaration endpoint" should {
 
-    "return a 200 status code" when {
+    "return a 204 status code" when {
 
       "any valid request is made" in new Test {
         override val nino: String = "AA123456A"
@@ -57,7 +57,7 @@ class EopsDeclarationControllerISpec extends IntegrationBaseSpec {
           DesStub.submissionSuccess(nino, selfEmploymentId, from, to)
         }
 
-        val submissionJson = Json.obj("finalised" -> true)
+        val submissionJson: JsObject = Json.obj("finalised" -> true)
 
         val response: WSResponse = await(request().post(submissionJson))
         response.status shouldBe Status.NO_CONTENT

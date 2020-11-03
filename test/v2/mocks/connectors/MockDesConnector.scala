@@ -26,14 +26,14 @@ import v2.models.outcomes.EopsDeclarationOutcome
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait MockDesConnector extends MockFactory{
+trait MockDesConnector extends MockFactory {
 
-  val mockDesConnector = mock[DesConnector]
+  val mockDesConnector: DesConnector = mock[DesConnector]
 
   object MockDesConnector {
     def submitEOPSDeclaration(nino: String, from: LocalDate, to: LocalDate, selfEmploymentId: String): CallHandler[Future[EopsDeclarationOutcome]] = {
-      (mockDesConnector.submitEOPSDeclaration(_: String, _: LocalDate, _: LocalDate, _: String)(_: HeaderCarrier, _: ExecutionContext))
-        .expects(nino, from, to, selfEmploymentId, *, *)
+      (mockDesConnector.submitEOPSDeclaration(_: String, _: LocalDate, _: LocalDate, _: String)(_: HeaderCarrier, _: ExecutionContext, _: String))
+        .expects(nino, from, to, selfEmploymentId, *, *, *)
     }
   }
 }
