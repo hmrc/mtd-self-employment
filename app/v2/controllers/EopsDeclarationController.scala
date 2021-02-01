@@ -67,10 +67,11 @@ class EopsDeclarationController @Inject()(val authService: EnrolmentsAuthService
               auditEopsSubmission(nino, selfEmploymentId, from, to, request.request.body,
                 desResponse.correlationId, userDetails, EopsDeclarationAuditResponse(NO_CONTENT, None))
               NoContent.withHeaders("X-CorrelationId" -> desResponse.correlationId)
+
             case Left(errorResponse) =>
               val resCorrelationId = errorResponse.correlationId
               val result = processError(errorResponse).withHeaders("X-CorrelationId" -> resCorrelationId)
-              logger.info(
+              logger.warn(
                 s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
                   s"Error response received with CorrelationId: $resCorrelationId")
               auditEopsSubmission(nino, selfEmploymentId, from, to, request.request.body, resCorrelationId,
@@ -80,7 +81,7 @@ class EopsDeclarationController @Inject()(val authService: EnrolmentsAuthService
         case Left(validationErrorResponse) =>
           val resCorrelationId = validationErrorResponse.correlationId
           val result = processError(validationErrorResponse).withHeaders("X-CorrelationId" -> resCorrelationId)
-          logger.info(
+          logger.warn(
             s"[${endpointLogContext.controllerName}][${endpointLogContext.endpointName}] - " +
               s"Error response received with CorrelationId: $resCorrelationId")
           auditEopsSubmission(nino, selfEmploymentId, from, to, request.request.body, resCorrelationId,
