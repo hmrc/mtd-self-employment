@@ -17,19 +17,19 @@
 package v2.services
 
 import org.scalamock.handlers.CallHandler
-import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Individual, Organisation}
+import uk.gov.hmrc.auth.core.AffinityGroup.{Individual, Organisation}
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
-import uk.gov.hmrc.auth.core.retrieve.Retrieval
+import uk.gov.hmrc.auth.core.authorise.{AlternatePredicate, CompositePredicate, EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
-import uk.gov.hmrc.auth.core.retrieve.~
+import uk.gov.hmrc.auth.core.retrieve.{Retrieval, ~}
 import uk.gov.hmrc.http.HeaderCarrier
+import v2.mocks.MockAppConfig
 import v2.models.auth.UserDetails
 import v2.models.errors.{DownstreamError, UnauthorisedError}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class EnrolmentsAuthServiceSpec extends ServiceSpec {
+class EnrolmentsAuthServiceSpec extends ServiceSpec with MockAppConfig {
 
   trait Test {
     val mockAuthConnector: AuthConnector = mock[AuthConnector]
@@ -44,113 +44,197 @@ class EnrolmentsAuthServiceSpec extends ServiceSpec {
       }
     }
 
-    lazy val target = new EnrolmentsAuthService(mockAuthConnector)
+    lazy val target = new EnrolmentsAuthService(mockAuthConnector, mockAppConfig)
   }
 
-  "calling .authorised" when {
+  private val extraPredicatesAnd =
+    CompositePredicate(_, AlternatePredicate(AlternatePredicate(CompositePredicate(AffinityGroup.Individual, ConfidenceLevel.L200), AffinityGroup.Organisation), AffinityGroup.Agent))
 
-    "the user is an authorised individual" should {
-      "return the 'Individual' user type in the user details" in new Test {
+  "calling .buildPredicate" when {
+    "confidence level checks are on" should {
+      "return a Predicate containing confidence level 200 on top of the provided Predicate" when {
+        "passed a simple Individual Predicate" in new Test {
+          MockedAppConfig.authServiceValidationEnabled.returns(true)
 
-        val retrievalsResult = new ~(Some(Individual), Enrolments(Set.empty))
-        val expected = Right(UserDetails("", "Individual", None))
+          target.buildPredicate(AffinityGroup.Individual) shouldBe extraPredicatesAnd(AffinityGroup.Individual)
+        }
+        "passed a complex Individual Predicate" in new Test {
+          MockedAppConfig.authServiceValidationEnabled.returns(true)
 
-        MockedAuthConnector.authorised(EmptyPredicate, authRetrievals)
-          .returns(Future.successful(retrievalsResult))
+          target.buildPredicate(CompositePredicate(AffinityGroup.Individual, EmptyPredicate)) shouldBe {
+            extraPredicatesAnd(CompositePredicate(AffinityGroup.Individual, EmptyPredicate))
+          }
+        }
+      }
+      "return a Predicate containing only the provided Predicate" when {
+        "passed a simple Organisation Predicate" in new Test {
+          MockedAppConfig.authServiceValidationEnabled.returns(true)
 
-        private val result = await(target.authorised(EmptyPredicate))
+          target.buildPredicate(AffinityGroup.Organisation) shouldBe extraPredicatesAnd(AffinityGroup.Organisation)
+        }
+        "passed a complex Organisation Predicate" in new Test {
+          MockedAppConfig.authServiceValidationEnabled.returns(true)
 
-        result shouldBe expected
+          target.buildPredicate(CompositePredicate(AffinityGroup.Organisation, EmptyPredicate)) shouldBe {
+            extraPredicatesAnd(CompositePredicate(AffinityGroup.Organisation, EmptyPredicate))
+          }
+        }
+        "passed a simple Agent Predicate" in new Test {
+          MockedAppConfig.authServiceValidationEnabled.returns(true)
+
+          target.buildPredicate(AffinityGroup.Agent) shouldBe extraPredicatesAnd(AffinityGroup.Agent)
+        }
+        "passed a complex Agent Predicate" in new Test {
+          MockedAppConfig.authServiceValidationEnabled.returns(true)
+
+          target.buildPredicate(CompositePredicate(AffinityGroup.Agent, EmptyPredicate)) shouldBe {
+            extraPredicatesAnd(CompositePredicate(AffinityGroup.Agent, EmptyPredicate))
+          }
+        }
+      }
+    }
+    "confidence level checks are off" should {
+      "return a Predicate containing only the provided Predicate" when {
+        "passed a simple Predicate" in new Test {
+          MockedAppConfig.authServiceValidationEnabled.returns(false)
+
+          target.buildPredicate(AffinityGroup.Individual) shouldBe AffinityGroup.Individual
+        }
+        "passed a complex Predicate" in new Test {
+          MockedAppConfig.authServiceValidationEnabled.returns(false)
+
+          target.buildPredicate(CompositePredicate(AffinityGroup.Agent, Enrolment("HMRC-AS-AGENT"))) shouldBe
+            CompositePredicate(AffinityGroup.Agent, Enrolment("HMRC-AS-AGENT"))
+        }
       }
     }
 
-    "the user is an authorised organisation" should {
-      "return the 'Organisation' user type in the user details" in new Test {
+    "calling .authorised" when {
 
-        val retrievalsResult = new ~(Some(Organisation), Enrolments(Set.empty))
-        val expected = Right(UserDetails("", "Organisation", None))
+      "confidence level checks are on" should {
+        "return user details" in new Test {
+          MockedAppConfig.authServiceValidationEnabled.returns(true)
 
-        MockedAuthConnector.authorised(EmptyPredicate, authRetrievals)
-          .returns(Future.successful(retrievalsResult))
+          val retrievalsResult = new ~(Some(AffinityGroup.Individual), Enrolments(Set.empty))
+          val expected = Right(UserDetails("", "Individual", None))
 
-        private val result = await(target.authorised(EmptyPredicate))
+          MockedAuthConnector.authorised(extraPredicatesAnd(EmptyPredicate), authRetrievals)
+            .returns(Future.successful(retrievalsResult))
 
-        result shouldBe expected
+          private val result = await(target.authorised(EmptyPredicate))
+
+          result shouldBe expected
+        }
       }
-    }
 
-    "the user is an agent with missing ARN" should {
-      val arn = "123567890"
-      val incompleteEnrolments = Enrolments(
-        Set(
-          Enrolment(
-            "HMRC-AS-AGENT",
-            Seq(EnrolmentIdentifier("SomeOtherIdentifier", arn)),
-            "Active"
-          )
-        )
-      )
+      "the user is an authorised individual" should {
+        "return the 'Individual' user type in the user details" in new Test {
 
-      val retrievalsResult = new ~(Some(Agent), incompleteEnrolments)
+          MockedAppConfig.authServiceValidationEnabled.returns(false)
+          val retrievalsResult = new ~(Some(Individual), Enrolments(Set.empty))
+          val expected = Right(UserDetails("", "Individual", None))
 
-      "return an error" in new Test {
+          MockedAuthConnector.authorised(EmptyPredicate, authRetrievals)
+            .returns(Future.successful(retrievalsResult))
 
-        val expected = Left(DownstreamError)
+          private val result = await(target.authorised(EmptyPredicate))
 
-        MockedAuthConnector.authorised(EmptyPredicate, authRetrievals)
-          .returns(Future.successful(retrievalsResult))
-
-        private val result = await(target.authorised(EmptyPredicate))
-
-        result shouldBe expected
+          result shouldBe expected
+        }
       }
-    }
 
-    "the user is not logged in" should {
-      "return an unauthenticated error" in new Test {
+      "the user is an authorised organisation" should {
+        "return the 'Organisation' user type in the user details" in new Test {
 
-        val expected = Left(UnauthorisedError)
+          MockedAppConfig.authServiceValidationEnabled.returns(false)
+          val retrievalsResult = new ~(Some(Organisation), Enrolments(Set.empty))
+          val expected = Right(UserDetails("", "Organisation", None))
 
-        MockedAuthConnector.authorised(EmptyPredicate, authRetrievals)
-          .returns(Future.failed(MissingBearerToken()))
+          MockedAuthConnector.authorised(EmptyPredicate, authRetrievals)
+            .returns(Future.successful(retrievalsResult))
 
-        private val result = await(target.authorised(EmptyPredicate))
+          private val result = await(target.authorised(EmptyPredicate))
 
-        result shouldBe expected
+          result shouldBe expected
+        }
       }
-    }
 
-    "the user is not authorised" should {
-      "return an unauthorised error" in new Test {
-
-        val expected = Left(UnauthorisedError)
-
-        MockedAuthConnector.authorised(EmptyPredicate, authRetrievals)
-          .returns(Future.failed(InsufficientEnrolments()))
-
-        private val result = await(target.authorised(EmptyPredicate))
-
-        result shouldBe expected
-      }
-    }
-
-  }
-
-  "calling getAgentReferenceFromEnrolments" should {
-    "return a valid AgentReferenceNumber" when {
-      "a valid agent Enrolment is supplied" in new Test{
-        val expectedArn = "123567890"
-        val actualArn = target.getAgentReferenceFromEnrolments(Enrolments(
+      "the user is an agent with missing ARN" should {
+        val arn = "123567890"
+        val incompleteEnrolments = Enrolments(
           Set(
             Enrolment(
               "HMRC-AS-AGENT",
-              Seq(EnrolmentIdentifier("AgentReferenceNumber", expectedArn)),
+              Seq(EnrolmentIdentifier("SomeOtherIdentifier", arn)),
               "Active"
             )
           )
-        ))
+        )
 
-        actualArn shouldBe Some(expectedArn)
+        val retrievalsResult = new ~(Some(AffinityGroup.Agent), incompleteEnrolments)
+
+        "return an error" in new Test {
+
+          MockedAppConfig.authServiceValidationEnabled.returns(false)
+          val expected = Left(DownstreamError)
+
+          MockedAuthConnector.authorised(EmptyPredicate, authRetrievals)
+            .returns(Future.successful(retrievalsResult))
+
+          private val result = await(target.authorised(EmptyPredicate))
+
+          result shouldBe expected
+        }
+      }
+
+      "the user is not logged in" should {
+        "return an unauthenticated error" in new Test {
+
+          MockedAppConfig.authServiceValidationEnabled.returns(false)
+          val expected = Left(UnauthorisedError)
+
+          MockedAuthConnector.authorised(EmptyPredicate, authRetrievals)
+            .returns(Future.failed(MissingBearerToken()))
+
+          private val result = await(target.authorised(EmptyPredicate))
+
+          result shouldBe expected
+        }
+      }
+
+      "the user is not authorised" should {
+        "return an unauthorised error" in new Test {
+
+          MockedAppConfig.authServiceValidationEnabled.returns(false)
+          val expected = Left(UnauthorisedError)
+
+          MockedAuthConnector.authorised(EmptyPredicate, authRetrievals)
+            .returns(Future.failed(InsufficientEnrolments()))
+
+          private val result = await(target.authorised(EmptyPredicate))
+
+          result shouldBe expected
+        }
+      }
+
+    }
+
+    "calling getAgentReferenceFromEnrolments" should {
+      "return a valid AgentReferenceNumber" when {
+        "a valid agent Enrolment is supplied" in new Test {
+          val expectedArn = "123567890"
+          val actualArn = target.getAgentReferenceFromEnrolments(Enrolments(
+            Set(
+              Enrolment(
+                "HMRC-AS-AGENT",
+                Seq(EnrolmentIdentifier("AgentReferenceNumber", expectedArn)),
+                "Active"
+              )
+            )
+          ))
+
+          actualArn shouldBe Some(expectedArn)
+        }
       }
     }
   }
