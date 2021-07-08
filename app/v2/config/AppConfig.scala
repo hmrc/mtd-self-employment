@@ -17,6 +17,7 @@
 package v2.config
 
 import javax.inject.{Inject, Singleton}
+import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 trait AppConfig {
@@ -28,14 +29,17 @@ trait AppConfig {
 
   def desToken: String
 
+  def desEnvironmentHeaders: Option[Seq[String]]
+
   def authServiceValidationEnabled: Boolean}
 
 @Singleton
-class AppConfigImpl @Inject()(config: ServicesConfig) extends AppConfig {
+class AppConfigImpl @Inject()(config: ServicesConfig, configuration: Configuration) extends AppConfig {
 
   val mtdIdBaseUrl: String = config.baseUrl("mtd-id-lookup")
   val desBaseUrl: String = config.baseUrl("des")
   val desEnv: String = config.getString("microservice.services.des.env")
   val desToken: String = config.getString("microservice.services.des.token")
+  val desEnvironmentHeaders: Option[Seq[String]] = configuration.getOptional[Seq[String]]("microservice.services.des.environmentHeaders")
   val authServiceValidationEnabled: Boolean = config.getBoolean(s"api.confidence-level-check.auth-validation.enabled")
 }

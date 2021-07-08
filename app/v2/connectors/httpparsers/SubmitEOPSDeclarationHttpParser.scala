@@ -24,7 +24,7 @@ import v2.models.outcomes.{DesResponse, EopsDeclarationOutcome}
 
 object SubmitEOPSDeclarationHttpParser extends HttpParser {
 
-  val logger = Logger(SubmitEOPSDeclarationHttpParser.getClass)
+  override val logger = Logger(SubmitEOPSDeclarationHttpParser.getClass)
 
   implicit val submitEOPSDeclarationHttpReads: HttpReads[EopsDeclarationOutcome] =
     new HttpReads[EopsDeclarationOutcome] {

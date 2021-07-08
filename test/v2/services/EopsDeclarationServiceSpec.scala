@@ -18,11 +18,11 @@ package v2.services
 
 import java.time.LocalDate
 
-import uk.gov.hmrc.domain.Nino
 import v2.mocks.connectors.MockDesConnector
 import v2.mocks.services.MockAuditService
 import v2.models.EopsDeclarationSubmission
 import v2.models.auth.UserDetails
+import v2.models.domain.Nino
 import v2.models.errors.SubmitEopsDeclarationErrors._
 import v2.models.errors._
 import v2.models.outcomes.{DesResponse, EopsDeclarationOutcome}

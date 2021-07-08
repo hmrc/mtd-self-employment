@@ -21,7 +21,6 @@ import javax.inject.{Inject, Singleton}
 
 import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.http.HttpClient
 import v2.config.AppConfig
 import v2.models.outcomes.EopsDeclarationOutcome
@@ -34,9 +33,19 @@ class DesConnector @Inject()(http: HttpClient,
 
   val logger: Logger = Logger(this.getClass)
 
-  private[connectors] def desHeaderCarrier(implicit hc: HeaderCarrier, correlationId: String): HeaderCarrier = hc
-    .copy(authorization = Some(Authorization(s"Bearer ${appConfig.desToken}")))
-    .withExtraHeaders("Environment" -> appConfig.desEnv, "Content-Type" -> "application/json", "CorrelationId" -> correlationId)
+  private def downstreamHeaderCarrier(additionalHeaders: Seq[String] = Seq.empty)(implicit hc: HeaderCarrier,
+                                                                                  correlationId: String): HeaderCarrier =
+    HeaderCarrier(
+      extraHeaders = hc.extraHeaders ++
+        // Contract headers
+        Seq(
+          "Authorization" -> s"Bearer ${appConfig.desToken}",
+          "Environment" -> appConfig.desEnv,
+          "CorrelationId" -> correlationId
+        ) ++
+        // Other headers (i.e Gov-Test-Scenario, Content-Type)
+        hc.headers(additionalHeaders ++ appConfig.desEnvironmentHeaders.getOrElse(Seq.empty))
+    )
 
   def submitEOPSDeclaration(nino: String, from: LocalDate, to: LocalDate, selfEmploymentId: String)(
     implicit hc: HeaderCarrier,
@@ -47,6 +56,6 @@ class DesConnector @Inject()(http: HttpClient,
 
     val url = s"${appConfig.desBaseUrl}/income-tax/income-sources/nino/$nino/self-employment/$from/$to/declaration?incomeSourceId=$selfEmploymentId"
 
-    http.POSTEmpty[EopsDeclarationOutcome](url)(submitEOPSDeclarationHttpReads, desHeaderCarrier, implicitly)
+    http.POSTEmpty[EopsDeclarationOutcome](url)(submitEOPSDeclarationHttpReads, downstreamHeaderCarrier(), implicitly)
   }
 }

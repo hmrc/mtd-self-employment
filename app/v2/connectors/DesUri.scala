@@ -14,16 +14,6 @@
  * limitations under the License.
  */
 
-package v2.controllers.requestParsers.validators.validations
+package v2.connectors
 
-import v2.models.domain.Nino
-import v2.models.errors.{MtdError, NinoFormatError}
-import v2.validations.NoValidationErrors
-
-object NinoValidation {
-
-  def validate(nino: String): List[MtdError] = {
-    if (!Nino.isValid(nino)) List(NinoFormatError) else NoValidationErrors
-  }
-
-}
+case class DesUri[Resp](value: String)
