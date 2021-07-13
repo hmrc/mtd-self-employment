@@ -43,17 +43,9 @@ trait MockHttpClient extends MockFactory {
         }})
     }
 
-    def postEmpty[T](url: String,
-                   config: HeaderCarrier.Config,
-                   requiredHeaders: Seq[(String, String)] = Seq.empty,
-                   excludedHeaders: Seq[(String, String)] = Seq.empty): CallHandler[Future[T]] = {
-      (mockHttpClient.POSTEmpty(_: String, _: Seq[(String, String)])(_: HttpReads[T], _: HeaderCarrier, _: ExecutionContext))
-        .expects(where { (actualUrl: String, _, _, hc: HeaderCarrier, _) => {
-          val headersForUrl = hc.headersForUrl(config)(actualUrl)
-          url == actualUrl &&
-            requiredHeaders.forall(h => headersForUrl.contains(h)) &&
-            excludedHeaders.forall(h => !headersForUrl.contains(h))
-        }})
+    def postEmpty[T](url: String): CallHandler[Future[T]] = {
+      (mockHttpClient.POSTEmpty[T](_: String, _: Seq[(String, String)])(_: HttpReads[T], _: HeaderCarrier, _: ExecutionContext))
+        .expects(url, *, *, *, *)
     }
   }
 }

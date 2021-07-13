@@ -28,16 +28,15 @@ class DesConnectorSpec extends ConnectorSpec {
 
   case class Result(value: Int)
 
-  val url = "some/url?param=value"
-
-  val absoluteUrl = s"$baseUrl/$url"
-  val outcome = Right(DesResponse(correlationId, ()))
-
   val nino: String = "AA12356A"
   val from: LocalDate = LocalDate.parse("2017-01-01")
   val to: LocalDate = LocalDate.parse("2018-01-01")
   val selfEmploymentId: String = "test-se-id"
 
+  val url = s"income-tax/income-sources/nino/$nino/self-employment/$from/$to/declaration?incomeSourceId=$selfEmploymentId"
+
+  val absoluteUrl = s"$baseUrl/$url"
+  val outcome = Right(DesResponse(correlationId, ()))
 
   private class Test(desEnvironmentHeaders: Option[Seq[String]]) extends MockHttpClient with MockAppConfig {
 
@@ -66,7 +65,7 @@ class DesConnectorSpec extends ConnectorSpec {
     )
 
     "making a HTTP request to a downstream service (i.e DES)" must {
-      testHttpMethods(dummyDesHeaderCarrierConfig, requiredHeaders, excludedHeaders, Some(allowedDesHeaders))
+      testHttpMethods(dummyDesHeaderCarrierConfig, requiredHeaders, otherHeaders, None)
 
       "exclude all `otherHeaders` when no external service header allow-list is found" should {
         val requiredHeaders: Seq[(String, String)] = Seq(
@@ -89,7 +88,7 @@ class DesConnectorSpec extends ConnectorSpec {
     "complete the request successfully with the required headers" when {
       "POST" in new Test(desEnvironmentHeaders) {
         MockHttpClient
-          .postEmpty(absoluteUrl, config, requiredHeaders, excludedHeaders)
+          .postEmpty(absoluteUrl)
           .returns(Future.successful(outcome))
 
         await(connector.submitEOPSDeclaration(nino, from, to, selfEmploymentId)) shouldBe outcome
