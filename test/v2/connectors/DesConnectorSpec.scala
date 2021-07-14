@@ -55,7 +55,7 @@ class DesConnectorSpec extends ConnectorSpec {
     val requiredHeaders: Seq[(String, String)] = Seq(
       "Environment" -> "des-environment",
       "Authorization" -> s"Bearer des-token",
-      "User-Agent" -> "individual-disclosures-api",
+      "User-Agent" -> "mtd-self-employment",
       "CorrelationId" -> correlationId,
       "Gov-Test-Scenario" -> "DEFAULT"
     )
@@ -65,7 +65,7 @@ class DesConnectorSpec extends ConnectorSpec {
     )
 
     "making a HTTP request to a downstream service (i.e DES)" must {
-      testHttpMethods(dummyDesHeaderCarrierConfig, requiredHeaders, otherHeaders, None)
+      testHttpMethods(dummyDesHeaderCarrierConfig, requiredHeaders, excludedHeaders, Some(allowedDesHeaders))
 
       "exclude all `otherHeaders` when no external service header allow-list is found" should {
         val requiredHeaders: Seq[(String, String)] = Seq(
@@ -88,7 +88,7 @@ class DesConnectorSpec extends ConnectorSpec {
     "complete the request successfully with the required headers" when {
       "POST" in new Test(desEnvironmentHeaders) {
         MockHttpClient
-          .postEmpty(absoluteUrl)
+          .postEmpty(absoluteUrl, config, requiredHeaders, excludedHeaders)
           .returns(Future.successful(outcome))
 
         await(connector.submitEOPSDeclaration(nino, from, to, selfEmploymentId)) shouldBe outcome
