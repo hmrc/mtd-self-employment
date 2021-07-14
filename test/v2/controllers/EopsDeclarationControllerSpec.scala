@@ -21,13 +21,13 @@ import java.time.LocalDate
 import org.scalatest.prop.TableDrivenPropertyChecks
 import play.api.libs.json.{JsArray, JsValue, Json}
 import play.api.mvc.{AnyContentAsJson, Result}
-import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import v2.mocks.MockIdGenerator
 import v2.mocks.requestParsers.MockEopsDeclarationRequestDataParser
 import v2.mocks.services.{MockAuditService, MockEnrolmentsAuthService, MockEopsDeclarationService, MockMtdIdLookupService}
 import v2.models.EopsDeclarationSubmission
 import v2.models.audit.AuditEvent
+import v2.models.domain.Nino
 import v2.models.errors.SubmitEopsDeclarationErrors._
 import v2.models.errors._
 import v2.models.inbound.EopsDeclarationRequestData

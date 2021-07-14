@@ -18,68 +18,83 @@ package v2.connectors
 
 import java.time.LocalDate
 
-import play.api.http.HeaderNames
+import uk.gov.hmrc.http.HeaderCarrier
 import v2.mocks.{MockAppConfig, MockHttpClient}
-import v2.models.errors._
-import v2.models.outcomes.{DesResponse, EopsDeclarationOutcome}
+import v2.models.outcomes.DesResponse
 
 import scala.concurrent.Future
 
 class DesConnectorSpec extends ConnectorSpec {
 
-  val baseUrl = "test-mtdIdBaseUrl"
+  case class Result(value: Int)
 
-  private trait Test extends MockHttpClient with MockAppConfig {
+  val nino: String = "AA12356A"
+  val from: LocalDate = LocalDate.parse("2017-01-01")
+  val to: LocalDate = LocalDate.parse("2018-01-01")
+  val selfEmploymentId: String = "test-se-id"
+
+  val url = s"income-tax/income-sources/nino/$nino/self-employment/$from/$to/declaration?incomeSourceId=$selfEmploymentId"
+
+  val absoluteUrl = s"$baseUrl/$url"
+  val outcome = Right(DesResponse(correlationId, ()))
+
+  private class Test(desEnvironmentHeaders: Option[Seq[String]]) extends MockHttpClient with MockAppConfig {
 
     val connector = new DesConnector(
       http = mockHttpClient,
       appConfig = mockAppConfig
     )
 
-    MockedAppConfig.desBaseUrl returns baseUrl
-    MockedAppConfig.desToken returns "des-token"
-    MockedAppConfig.desEnv returns "des-environment"
+    MockAppConfig.desBaseUrl returns baseUrl
+    MockAppConfig.desToken returns "des-token"
+    MockAppConfig.desEnv returns "des-environment"
+    MockAppConfig.desEnvironmentHeaders returns desEnvironmentHeaders
   }
 
-  "desHeaderCarrier" should {
-    "return a header carrier with an authorization header using the DES token specified in config" in new Test {
-      connector.desHeaderCarrier.headers.contains(HeaderNames.AUTHORIZATION -> "Bearer des-token") shouldBe true
-    }
+  "BaseDownstreamConnector" when {
+    val requiredHeaders: Seq[(String, String)] = Seq(
+      "Environment" -> "des-environment",
+      "Authorization" -> s"Bearer des-token",
+      "User-Agent" -> "mtd-self-employment",
+      "CorrelationId" -> correlationId,
+      "Gov-Test-Scenario" -> "DEFAULT"
+    )
 
-    "return a header carrier with an environment header using the DES environment specified in config" in new Test {
-      connector.desHeaderCarrier.headers.contains("Environment" -> "des-environment") shouldBe true
-    }
-  }
+    val excludedHeaders: Seq[(String, String)] = Seq(
+      "AnotherHeader" -> "HeaderValue"
+    )
 
-  "submitEOPSDeclaration" should {
+    "making a HTTP request to a downstream service (i.e DES)" must {
+      testHttpMethods(dummyDesHeaderCarrierConfig, requiredHeaders, excludedHeaders, Some(allowedDesHeaders))
 
-    val nino: String = "AA12356A"
-    val from: LocalDate = LocalDate.parse("2017-01-01")
-    val to: LocalDate = LocalDate.parse("2018-01-01")
-    val selfEmploymentId: String = "test-se-id"
+      "exclude all `otherHeaders` when no external service header allow-list is found" should {
+        val requiredHeaders: Seq[(String, String)] = Seq(
+          "Environment" -> "des-environment",
+          "Authorization" -> s"Bearer des-token",
+          "User-Agent" -> "mtd-self-employment",
+          "CorrelationId" -> correlationId,
+        )
 
-    val url: String = s"$baseUrl/income-tax/income-sources/nino/$nino/self-employment/$from/$to/declaration?incomeSourceId=$selfEmploymentId"
-
-    "return a None" when {
-      "the http client returns None" in new Test {
-        MockedHttpClient.postEmpty[EopsDeclarationOutcome](url)
-          .returns(Future.successful(Right(DesResponse(correlationId, ()))))
-
-        val result: EopsDeclarationOutcome = await(connector.submitEOPSDeclaration(nino, from, to, selfEmploymentId))
-        result shouldBe Right(DesResponse(correlationId, ()))
-      }
-    }
-
-    "return an ErrorWrapper" when {
-      "the http client returns an error response" in new Test {
-        val errorResponse: SingleError = SingleError(NinoFormatError)
-
-        MockedHttpClient.postEmpty[EopsDeclarationOutcome](url)
-          .returns(Future.successful(Left(DesResponse(correlationId, errorResponse))))
-
-        val result: EopsDeclarationOutcome = await(connector.submitEOPSDeclaration(nino, from, to, selfEmploymentId))
-        result shouldBe Left(DesResponse(correlationId, errorResponse))
+        testHttpMethods(dummyDesHeaderCarrierConfig, requiredHeaders, otherHeaders, None)
       }
     }
   }
+
+  def testHttpMethods(config: HeaderCarrier.Config,
+                      requiredHeaders: Seq[(String, String)],
+                      excludedHeaders: Seq[(String, String)],
+                      desEnvironmentHeaders: Option[Seq[String]]): Unit = {
+
+    "complete the request successfully with the required headers" when {
+      "POST" in new Test(desEnvironmentHeaders) {
+        MockHttpClient
+          .postEmpty(absoluteUrl, config, requiredHeaders, excludedHeaders)
+          .returns(Future.successful(outcome))
+
+        await(connector.submitEOPSDeclaration(nino, from, to, selfEmploymentId)) shouldBe outcome
+
+      }
+    }
+  }
+
 }

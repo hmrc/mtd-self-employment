@@ -25,12 +25,14 @@ import scala.util.{Success, Try}
 
 trait HttpParser {
 
+  val logger: Logger = Logger(this.getClass)
+
   implicit class KnownJsonResponse(response: HttpResponse) {
     def validateJson[T](implicit reads: Reads[T]): Option[T] = {
       Try(response.json) match {
         case Success(json: JsValue) => parseResult(json)
         case _ =>
-          Logger.warn("[KnownJsonResponse][validateJson] No JSON was returned")
+          logger.warn("[KnownJsonResponse][validateJson] No JSON was returned")
           None
       }
     }
@@ -39,7 +41,7 @@ trait HttpParser {
                               (implicit reads: Reads[T]): Option[T] = json.validate[T] match {
       case JsSuccess(value, _) => Some(value)
       case JsError(error) =>
-        Logger.warn(s"[KnownJsonResponse][validateJson] Unable to parse JSON: $error")
+        logger.warn(s"[KnownJsonResponse][validateJson] Unable to parse JSON: $error")
         None
     }
   }
@@ -57,7 +59,7 @@ trait HttpParser {
     lazy val multipleErrors = response.validateJson(multipleErrorReads).map(MultipleErrors)
     lazy val bvrErrors = response.validateJson(bvrErrorReads).map(BVRErrors)
     lazy val unableToParseJsonError = {
-      Logger.warn(s"unable to parse errors from response: ${response.body}")
+      logger.warn(s"unable to parse errors from response: ${response.body}")
       GenericError(DownstreamError)
     }
 

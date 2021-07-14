@@ -21,10 +21,10 @@ import java.time.LocalDate
 import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsJson
 import support.UnitSpec
-import uk.gov.hmrc.domain.Nino
 import v2.controllers.requestParsers.EopsDeclarationRequestDataParser
 import v2.mocks.validators.MockEopsDeclarationRequestDataValidator
 import v2.models.EopsDeclarationSubmission
+import v2.models.domain.Nino
 import v2.models.errors.{BadRequestError, ErrorWrapper, InvalidStartDateError, NinoFormatError}
 import v2.models.inbound.EopsDeclarationRequestData
 
